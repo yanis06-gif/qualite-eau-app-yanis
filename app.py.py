@@ -6,6 +6,7 @@ import os
 from PIL import Image
 import io
 from datetime import datetime
+import matplotlib.pyplot as plt
 
 # Configuration de la page
 st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", layout="centered")
@@ -93,16 +94,18 @@ elif mode == "🧪 Classifier la qualité de l’eau":
         for code, label in classes.items():
             st.write(f"**{code}** → {label}")
 
-st.subheader("📊 Gestion des prélèvements journaliers")
+
+st.set_page_config(page_title="Gestion des Prélèvements", layout="wide")
+st.title("💧 Application de Suivi et de Gestion des Prélèvements Journaliers")
 
 # === Initialisation session state ===
 if 'df_prelèvements' not in st.session_state:
-    st.session_state.df_prelèvements = pd.read_pickle("prelevements_sauvegarde.pkl") if "prelevements_sauvegarde.pkl" in st.session_state else pd.DataFrame()
+    try:
+        st.session_state.df_prelèvements = pd.read_pickle("prelevements_sauvegarde.pkl")
+    except:
+        st.session_state.df_prelèvements = pd.DataFrame()
 
-# === Formulaire de saisie ===
-st.markdown("### 📝 Saisie d’un nouveau prélèvement")
-
-# Liste des 23 paramètres physico-chimiques et bactériologiques
+# === Liste des paramètres ===
 parametres = [
     'Total Coliform', 'Escherichia Coli', 'Faecal Streptococci', 'Turbidity', 'pH', 'Temperature',
     'Free Chlorine', 'Chlorates', 'Sulfate', 'Magnesium', 'Calcium', 'Conductivity', 'Dry Residue',
@@ -110,19 +113,24 @@ parametres = [
     'Colour', 'Smell', 'Taste'
 ]
 
+# === Saisie de données ===
+st.markdown("### 📝 Saisie d’un nouveau prélèvement")
 with st.form(key="saisie_prelevement"):
-    date = st.date_input("Date du prélèvement", value=datetime.today())
-    heure = st.time_input("Heure du prélèvement")
-    entreprise = st.text_input("Nom de l’entreprise")
-    localisation = st.text_input("Localisation")
-    code = st.text_input("Code de l’échantillon")
-    preleveur = st.text_input("Nom du préleveur")
-    analyste = st.text_input("Nom de l’analyste")
+    col1, col2 = st.columns(2)
+    with col1:
+        date = st.date_input("Date du prélèvement", value=datetime.today())
+        entreprise = st.text_input("Nom de l’entreprise")
+        code = st.text_input("Code de l’échantillon")
+        preleveur = st.text_input("Nom du préleveur")
+    with col2:
+        heure = st.time_input("Heure du prélèvement")
+        localisation = st.text_input("Localisation")
+        analyste = st.text_input("Nom de l’analyste")
 
-    # Paramètres mesurés
+    st.markdown("### 🔬 Résultats des analyses")
     resultats = {}
     for param in parametres:
-        resultats[param] = st.number_input(param, value=0.0, format="%.4f")
+        resultats[param] = st.number_input(param, value=0.0, format="%.4f", key=f"saisie_{param}")
 
     submitted = st.form_submit_button("Ajouter le prélèvement")
 
@@ -139,38 +147,62 @@ with st.form(key="saisie_prelevement"):
         new_data.update(resultats)
         new_df = pd.DataFrame([new_data])
         st.session_state.df_prelèvements = pd.concat([st.session_state.df_prelèvements, new_df], ignore_index=True)
-        st.success("✅ Prélèvement ajouté avec succès")
-        # Sauvegarde permanente
         st.session_state.df_prelèvements.to_pickle("prelevements_sauvegarde.pkl")
+        st.success("✅ Prélèvement ajouté avec succès")
 
-# === Affichage du tableau ===
-st.markdown("### 📋 Prélèvements enregistrés")
-if not st.session_state.df_prelèvements.empty:
-    st.dataframe(st.session_state.df_prelèvements)
+# === Filtrage ===
+st.markdown("### 🔍 Filtrer les prélèvements")
+df = st.session_state.df_prelèvements.copy()
+if not df.empty:
+    with st.expander("🗂️ Filtres avancés"):
+        entreprises = df['Entreprise'].dropna().unique().tolist()
+        selected_entreprise = st.selectbox("Entreprise", ["Toutes"] + entreprises)
 
-    # === Export Excel ===
+        dates = df['Date'].astype(str).dropna().unique().tolist()
+        selected_date = st.selectbox("Date du prélèvement", ["Toutes"] + sorted(dates))
+
+        if selected_entreprise != "Toutes":
+            df = df[df['Entreprise'] == selected_entreprise]
+        if selected_date != "Toutes":
+            df = df[df['Date'].astype(str) == selected_date]
+
+# === Affichage tableau ===
+st.markdown("### 📋 Tableau des prélèvements")
+if not df.empty:
+    st.dataframe(df)
+
     def to_excel(df):
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             df.to_excel(writer, index=False, sheet_name='Prélèvements')
         return output.getvalue()
 
-    excel_data = to_excel(st.session_state.df_prelèvements)
-
-    st.download_button(
-        label="📥 Télécharger les prélèvements (Excel)",
-        data=excel_data,
-        file_name="prelevements_journaliers.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
+    excel_data = to_excel(df)
+    st.download_button("📥 Télécharger (Excel)", data=excel_data, file_name="prelevements.xlsx",
+                       mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 else:
-    st.info("Aucun prélèvement enregistré pour le moment.")
+    st.info("Aucun prélèvement à afficher.")
 
-# === Importation de fichier ===
+# === Graphiques ===
+st.markdown("### 📊 Visualisation des paramètres")
+if not df.empty:
+    parametre_graph = st.selectbox("Sélectionner un paramètre à visualiser :", parametres)
+    if parametre_graph:
+        fig, ax = plt.subplots()
+        try:
+            df_sorted = df.sort_values("Date")
+            ax.plot(df_sorted["Date"], df_sorted[parametre_graph], marker='o')
+            ax.set_title(f"Évolution de {parametre_graph} dans le temps")
+            ax.set_xlabel("Date")
+            ax.set_ylabel(parametre_graph)
+            ax.grid(True)
+            st.pyplot(fig)
+        except Exception as e:
+            st.warning(f"Impossible de tracer ce paramètre : {e}")
+
+# === Importation fichier ===
 st.markdown("### 📁 Importer un fichier Excel ou CSV")
 uploaded_file = st.file_uploader("Choisissez un fichier", type=["xlsx", "csv"])
-
 if uploaded_file:
     try:
         if uploaded_file.name.endswith(".csv"):
