@@ -8,8 +8,11 @@ import io
 from datetime import datetime
 import matplotlib.pyplot as plt
 
+
 # Configuration de la page
 st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", layout="centered")
+st.set_page_config(page_title="Gestion des Prélèvements", layout="wide")
+
 
 # Titre
 st.title("💧 Application IA - Prédiction et Classification de la qualité de l'eau")
@@ -94,8 +97,6 @@ elif mode == "🧪 Classifier la qualité de l’eau":
         for code, label in classes.items():
             st.write(f"**{code}** → {label}")
 
-
-st.set_page_config(page_title="Gestion des Prélèvements", layout="wide")
 st.title("💧 Application de Suivi et de Gestion des Prélèvements Journaliers")
 
 # === Initialisation session state ===
