@@ -132,63 +132,55 @@ with tabs[2]:
 
     # Formulaire saisie nouveau prélèvement
     with st.form(key="saisie_prelevement"):
-        col1, col2 = st.columns(2)
-        with col1:
-            date = st.date_input("Date du prélèvement", value=datetime.today(), key="gestion_date")
-            entreprise = st.text_input("Nom de l’entreprise", key="gestion_entreprise")
-            code = st.text_input("Code de l’échantillon", key="gestion_code")
-            preleveur = st.text_input("Nom du préleveur", key="gestion_preleveur")
-        with col2:
-            heure = st.time_input("Heure du prélèvement", key="gestion_heure")
-            localisation = st.text_input("Localisation", key="gestion_localisation")
-            analyste = st.text_input("Nom de l’analyste", key="gestion_analyste")
+    col1, col2 = st.columns(2)
+    with col1:
+        date = st.date_input("Date du prélèvement", value=datetime.today(), key="gestion_date")
+        entreprise = st.text_input("Nom de l’entreprise", key="gestion_entreprise")
+        code = st.text_input("Code de l’échantillon", key="gestion_code")
+        preleveur = st.text_input("Nom du préleveur", key="gestion_preleveur")
+    with col2:
+        heure = st.time_input("Heure du prélèvement", key="gestion_heure")
+        localisation = st.text_input("Localisation", key="gestion_localisation")
+        analyste = st.text_input("Nom de l’analyste", key="gestion_analyste")
 
-        st.markdown("### 🔬 Résultats des analyses")
-        resultats = {}
-        for param in parametres:
-            resultats[param] = st.number_input(param, value=0.0, format="%.4f", key=f"gestion_{param}")
+    st.markdown("### 🔬 Résultats des analyses")
+    resultats = {}
+    for param in parametres:
+        resultats[param] = st.number_input(param, value=0.0, format="%.4f", key=f"gestion_{param}")
 
-        # Affichage paramètres dynamiques existants
-        if st.session_state.parametres_dynamiques:
-            st.markdown("### ⚙️ Paramètres personnalisés ajoutés")
-            for p, v in st.session_state.parametres_dynamiques.items():
-                resultats[p] = st.number_input(p, value=float(v), format="%.4f", key=f"gestion_dyn_{p}")
+    # Paramètres dynamiques ajoutés
+    if st.session_state.parametres_dynamiques:
+        st.markdown("### ⚙️ Paramètres personnalisés ajoutés")
+        for p, v in st.session_state.parametres_dynamiques.items():
+            resultats[p] = st.number_input(p, value=float(v), format="%.4f", key=f"gestion_dyn_{p}")
 
-        # Section ajout paramètre personnalisé
-        with st.expander("➕ Ajouter un paramètre personnalisé"):
-            nouveau_param = st.text_input("Nom du paramètre", key="new_param_name")
-            valeur_param = st.number_input("Valeur", value=0.0, format="%.4f", key="new_param_value")
-            if st.button("Ajouter ce paramètre", key="add_param_button"):
-                if nouveau_param.strip() != "":
-                    st.session_state.parametres_dynamiques[nouveau_param.strip()] = valeur_param
-                    st.success(f"✅ Paramètre '{nouveau_param.strip()}' ajouté.")
+    with st.expander("➕ Ajouter un paramètre personnalisé"):
+        nouveau_param = st.text_input("Nom du paramètre", key="new_param_name")
+        valeur_param = st.number_input("Valeur", value=0.0, format="%.4f", key="new_param_value")
+        if st.button("Ajouter ce paramètre", key="add_param_button"):
+            if nouveau_param.strip() != "":
+                st.session_state.parametres_dynamiques[nouveau_param.strip()] = valeur_param
+                st.success(f"✅ Paramètre '{nouveau_param.strip()}' ajouté.")
 
-      submitted = st.form_submit_button("Ajouter le prélèvement", key="submit_prelevement")
-if submitted:
-    new_data = {
-        "Date": date,
-        "Heure": heure,
-        "Entreprise": entreprise,
-        "Localisation": localisation,
-        "Code": code,
-        "Préleveur": preleveur,
-        "Analyste": analyste
-    }
-    new_data.update(resultats)
+    submitted = st.form_submit_button("Ajouter le prélèvement", key="submit_prelevement")
+    if submitted:
+        new_data = {
+            "Date": date, "Heure": heure, "Entreprise": entreprise,
+            "Localisation": localisation, "Code": code,
+            "Préleveur": preleveur, "Analyste": analyste
+        }
+        new_data.update(resultats)
 
-    st.session_state.df_prelèvements = pd.concat(
-        [st.session_state.df_prelèvements, pd.DataFrame([new_data])], ignore_index=True
-    )
-    st.session_state.df_prelèvements.to_pickle("prelevements_sauvegarde.pkl")
-    st.success("✅ Prélèvement ajouté avec succès")
+        st.session_state.df_prelèvements = pd.concat([st.session_state.df_prelèvements, pd.DataFrame([new_data])], ignore_index=True)
+        st.session_state.df_prelèvements.to_pickle("prelevements_sauvegarde.pkl")
+        st.success("✅ Prélèvement ajouté avec succès")
 
-    alertes = verifier_parametres_entres(new_data)
-    if alertes:
-        for msg in alertes:
-            st.warning(msg)
-    else:
-        st.success("✅ Tous les paramètres respectent les normes.")
-
+        alertes = verifier_parametres_entres(new_data)
+        if alertes:
+            for msg in alertes:
+                st.warning(msg)
+        else:
+            st.success("✅ Tous les paramètres respectent les normes.")
 
     # Filtrage des prélèvements
     st.markdown("### 🔍 Filtrer les prélèvements")
