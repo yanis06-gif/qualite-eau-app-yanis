@@ -5,6 +5,14 @@ import joblib
 import os
 from PIL import Image
 
+classes = {
+    3: "Très bonne",
+    0: "Bonne",
+    2: "Moyenne",
+    1: "Mauvaise",
+    4: "Très mauvaise"
+}
+
 # Configuration de la page
 st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", layout="centered")
 
@@ -61,13 +69,6 @@ elif mode == "🧪 Classifier la qualité de l’eau":
         val = st.number_input(param, value=0.0, format="%.4f")
         valeurs.append(val)
 
-        classes = {
-    3: "Très bonne",
-    0: "Bonne",
-    2: "Moyenne",
-    1: "Mauvaise",
-    4: "Très mauvaise"
-}
  if st.button("Prédire la classe de qualité"):
     try:
         model = joblib.load("modele_Classification.pkl")
