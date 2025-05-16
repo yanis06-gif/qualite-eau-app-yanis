@@ -92,94 +92,91 @@ elif mode == "🧪 Classifier la qualité de l’eau":
         for code, label in classes.items():
             st.write(f"**{code}** → {label}")
 
-            import pandas as pd
+           import streamlit as st
+import pandas as pd
 import io
+from datetime import datetime
 
 st.subheader("📊 Gestion des prélèvements journaliers")
 
-# Liste étendue de paramètres (exemple, tu pourras l'ajuster)
-parametres_etendus = [
-    'Date', 'Heure', 'Nom de l’entreprise', 'Localisation', 'Technicien', 
-    'Total Coliform', 'Escherichia Coli', 'Faecal Streptococci', 'Turbidity', 
-    'pH', 'Temperature', 'Free Chlorine', 'Chlorates', 'Sulfate', 'Magnesium', 
-    'Calcium', 'Conductivity', 'Dry Residue', 'Complete Alkaline Title', 
-    'Nitrite', 'Ammonium', 'Phosphate', 'Nitrate', 'Iron', 'Manganese', 
-    'Colour', 'Smell', 'Taste'
-]
-
-# Saisie manuelle via formulaire
-st.write("📝 Saisie manuelle des prélèvements")
-
-donnees = {}
-for i, param in enumerate(parametres_etendus):
-    if param == 'Date':
-        donnees[param] = st.date_input(param, key=f"{param}_{i}")
-    elif param == 'Heure':
-        donnees[param] = st.time_input(param, key=f"{param}_{i}")
-    elif param in ['Nom de l’entreprise', 'Localisation', 'Technicien']:
-        donnees[param] = st.text_input(param, key=f"{param}_{i}")
-    else:
-        donnees[param] = st.number_input(param, value=0.0, format="%.4f", key=f"{param}_{i}")
-
-
-# Button pour ajouter la ligne dans un dataframe stocké dans la session
+# === Initialisation session state ===
 if 'df_prelèvements' not in st.session_state:
-    st.session_state.df_prelèvements = pd.DataFrame(columns=parametres_etendus)
+    st.session_state.df_prelèvements = pd.DataFrame()
 
-if st.button("Ajouter ce prélèvement"):
-    nouvelle_ligne = pd.DataFrame([donnees])
-    st.session_state.df_prelèvements = pd.concat([st.session_state.df_prelèvements, nouvelle_ligne], ignore_index=True)
-    st.success("✅ Prélèvement ajouté !")
+# === Formulaire de saisie ===
+st.markdown("### 📝 Saisie d’un nouveau prélèvement")
 
-# Affiche le tableau des prélèvements ajoutés
-st.write("📋 Tableau des prélèvements enregistrés :")
-st.dataframe(st.session_state.df_prelèvements)
+with st.form(key="saisie_prelevement"):
+    date = st.date_input("Date du prélèvement", value=datetime.today())
+    heure = st.time_input("Heure du prélèvement")
+    entreprise = st.text_input("Nom de l’entreprise")
+    localisation = st.text_input("Localisation")
+    code = st.text_input("Code de l’échantillon")
+    preleveur = st.text_input("Nom du préleveur")
+    analyste = st.text_input("Nom de l’analyste")
 
-# Fonction pour exporter en Excel
-def to_excel(df):
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df.to_excel(writer, index=False, sheet_name='Prélèvements')
-        writer.save()
-    return output.getvalue()
+    # Quelques paramètres d'exemple
+    pH = st.number_input("pH", value=7.0)
+    temperature = st.number_input("Température (°C)", value=20.0)
+    chlore = st.number_input("Chlore libre (mg/L)", value=0.5)
+    turbidite = st.number_input("Turbidité (NTU)", value=0.3)
 
-# Bouton pour télécharger le fichier Excel
-def to_excel(df):
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df.to_excel(writer, index=False, sheet_name='Prélèvements')
-    return output.getvalue()
+    submitted = st.form_submit_button("Ajouter le prélèvement")
 
+    if submitted:
+        new_data = {
+            "Date": date,
+            "Heure": heure,
+            "Entreprise": entreprise,
+            "Localisation": localisation,
+            "Code": code,
+            "Préleveur": preleveur,
+            "Analyste": analyste,
+            "pH": pH,
+            "Température": temperature,
+            "Chlore libre": chlore,
+            "Turbidité": turbidite
+        }
+        new_df = pd.DataFrame([new_data])
+        st.session_state.df_prelèvements = pd.concat([st.session_state.df_prelèvements, new_df], ignore_index=True)
+        st.success("✅ Prélèvement ajouté avec succès")
 
-# Upload d'un fichier Excel ou CSV
-uploaded_file = st.file_uploader("📁 Importer un fichier Excel", type=["xlsx"])
+# === Affichage du tableau ===
+st.markdown("### 📋 Prélèvements enregistrés")
+if not st.session_state.df_prelèvements.empty:
+    st.dataframe(st.session_state.df_prelèvements)
+
+    # === Export Excel ===
+    def to_excel(df):
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False, sheet_name='Prélèvements')
+        return output.getvalue()
+
+    excel_data = to_excel(st.session_state.df_prelèvements)
+
+    st.download_button(
+        label="📥 Télécharger les prélèvements (Excel)",
+        data=excel_data,
+        file_name="prelevements_journaliers.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+else:
+    st.info("Aucun prélèvement enregistré pour le moment.")
+
+# === Importation de fichier ===
+st.markdown("### 📁 Importer un fichier Excel ou CSV")
+uploaded_file = st.file_uploader("Choisissez un fichier", type=["xlsx", "csv"])
 
 if uploaded_file:
     try:
-        xls = pd.ExcelFile(uploaded_file)
-        st.write("📄 Feuilles disponibles :", xls.sheet_names)
-        selected_sheet = st.selectbox("🧾 Sélectionne la feuille :", xls.sheet_names)
-
-        st.markdown("### 🔍 Aperçu brut du contenu (aucun skip, aucune colonne)")
-        raw_df = pd.read_excel(xls, sheet_name=selected_sheet, header=None)
-        st.dataframe(raw_df)
-
-    except Exception as e:
-        st.error(f"❌ Erreur de lecture : {e}")
-
-        # Tentative de lecture avec skiprows
-        df_import = pd.read_excel(xls, sheet_name=selected_sheet, skiprows=1000)
-
-        if df_import.empty:
-            st.warning("⚠️ Données toujours vides. Essaie d’augmenter la valeur de `skiprows`.")
+        if uploaded_file.name.endswith(".csv"):
+            imported_df = pd.read_csv(uploaded_file)
         else:
-            st.success("✅ Données importées avec succès !")
-            st.dataframe(df_import)
+            imported_df = pd.read_excel(uploaded_file)
+
+        st.write("✅ Données importées :")
+        st.dataframe(imported_df)
     except Exception as e:
-        st.error(f"❌ Erreur : {e}")
-
-# Tu peux ensuite choisir de fusionner avec st.session_state.df_prelèvements ou autre traitement
-
-
-
-
+        st.error(f"Erreur lors de l'importation : {e}")
