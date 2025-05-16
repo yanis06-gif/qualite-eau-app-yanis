@@ -264,5 +264,46 @@ with st.tabs(["🔍 Prédiction", "🧪 Classification", "📋 Gestion", "📊 V
     Elle est conçue pour être **transparente, pédagogique et évolutive**.
 
     ### 📩 Contact
-    Pour améliorer ou contribuer à ce projet, contactez-nous à : `yanisfth06@gmail.com`
+    Pour améliorer ou contribuer à ce projet, contactez-nous à : `contact@equipe-eau-dz.dz`
     """)
+
+# ==========================
+# 🌟 Personnalisation visuelle & charte
+# ==========================
+
+# Affichage du logo en haut à gauche
+col_logo, col_title = st.columns([1, 5])
+with col_logo:
+    if os.path.exists("logo.png"):
+        st.image("logo.png", width=100)
+with col_title:
+    st.markdown("## 🚰 Projet IA Qualité de l'Eau – Algérie")
+
+# Charte graphique CSS (pour titres & mise en page)
+st.markdown("""
+<style>
+h1, h2, h3 {
+    color: #0a9396;
+}
+.stButton > button {
+    background-color: #0a9396;
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+}
+.stDownloadButton > button {
+    background-color: #005f73;
+    color: white;
+    font-weight: bold;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Signature en bas de page
+st.markdown("""
+<hr>
+<p style='text-align: center; font-size: 0.9em; color: grey;'>
+Développé avec ❤️ par l'équipe IA & Eau Potable – Algérie 🇩🇿<br>
+© 2025 | Tous droits réservés
+</p>
+""", unsafe_allow_html=True)
