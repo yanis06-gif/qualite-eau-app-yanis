@@ -280,21 +280,41 @@ with st.form(key="saisie_prelevement"):
     else:
         st.info("Aucun prélèvement à afficher.")
 
+
+# === Fonction d'export Excel sécurisée ===
 def to_excel(df_to_export):
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df_to_export.to_excel(writer, index=False, sheet_name='Prélèvements')
-    processed_data = output.getvalue()
-    return processed_data
-excel_data = to_excel(df)
+    if df_to_export.empty:
+        return None
+    try:
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df_to_export.to_excel(writer, index=False, sheet_name='Prélèvements')
+        processed_data = output.getvalue()
+        return processed_data
+    except Exception as e:
+        st.error(f"❌ Erreur lors de la génération du fichier Excel : {e}")
+        return None
 
-if excel_data:
-    st.download_button(
-        label="📥 Télécharger (Excel)",
-        data=excel_data,
-        file_name="prelevements.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+# === Filtrage et affichage du tableau ===
+st.markdown("### 📋 Tableau des prélèvements filtrés")
+
+df = st.session_state.df_prelèvements.copy()
+
+if not df.empty:
+    st.dataframe(df, use_container_width=True)
+
+    excel_data = to_excel(df)
+
+    if excel_data:
+        st.download_button(
+            label="📥 Télécharger (Excel)",
+            data=excel_data,
+            file_name="prelevements.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            key="download_excel_button"
+        )
+    else:
+        st.warning("⚠️ Impossible de générer le fichier Excel (aucune donnée ou erreur).")
+
 else:
-    st.error("Erreur : données à exporter non valides.")
-
+    st.info("ℹ️ Aucun prélèvement à afficher ou exporter.")
