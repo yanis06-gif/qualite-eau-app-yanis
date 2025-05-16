@@ -56,44 +56,41 @@ if mode == "🔍 Prédire un paramètre manquant":
 # === Mode 2 : Classification de la qualité de l'eau ===
 
 elif mode == "🧪 Classifier la qualité de l’eau":
-   
-   # Dictionnaire de correspondance des classes encodées
-classes = {
-    3: "Très bonne",
-    0: "Bonne",
-    2: "Moyenne",
-    1: "Mauvaise",
-    4: "Très mauvaise"
-}
+    classes = {
+        3: "Très bonne",
+        0: "Bonne",
+        2: "Moyenne",
+        1: "Mauvaise",
+        4: "Très mauvaise"
+    }
 
-parametres = [
-    'Total Coliform', 'Escherichia Coli', 'Faecal Streptococci', 'Turbidity', 'pH', 'Temperature',
-    'Free Chlorine', 'Chlorates', 'Sulfate', 'Magnesium', 'Calcium', 'Conductivity', 'Dry Residue',
-    'Complete Alkaline Title', 'Nitrite', 'Ammonium', 'Phosphate', 'Nitrate', 'Iron', 'Manganese',
-    'Colour', 'Smell', 'Taste'
-]
+    parametres = [
+        'Total Coliform', 'Escherichia Coli', 'Faecal Streptococci', 'Turbidity', 'pH', 'Temperature',
+        'Free Chlorine', 'Chlorates', 'Sulfate', 'Magnesium', 'Calcium', 'Conductivity', 'Dry Residue',
+        'Complete Alkaline Title', 'Nitrite', 'Ammonium', 'Phosphate', 'Nitrate', 'Iron', 'Manganese',
+        'Colour', 'Smell', 'Taste'
+    ]
 
-st.subheader("🧪 Classification de la qualité de l’eau")
+    st.subheader("🧪 Classification de la qualité de l’eau")
 
-valeurs = []
-for param in parametres:
-    val = st.number_input(param, value=0.0, format="%.4f")
-    valeurs.append(val)
+    valeurs = []
+    for param in parametres:
+        val = st.number_input(param, value=0.0, format="%.4f")
+        valeurs.append(val)
 
-if st.button("Prédire la classe de qualité"):
-    try:
-        model = joblib.load("modele_classification.pkl")
-        X_input = np.array(valeurs).reshape(1, -1)
-        prediction = model.predict(X_input)
-        classe = classes.get(prediction[0], "Inconnue")
-        st.success(f"✅ Classe prédite : **{classe}**")
-    except Exception as e:
-        st.error(f"Erreur lors de la prédiction : {e}")
+    if st.button("Prédire la classe de qualité"):
+        try:
+            model = joblib.load("modele_classification.pkl")
+            X_input = np.array(valeurs).reshape(1, -1)
+            prediction = model.predict(X_input)
+            classe = classes.get(prediction[0], "Inconnue")
+            st.success(f"✅ Classe prédite : **{classe}**")
+        except Exception as e:
+            st.error(f"Erreur lors de la prédiction : {e}")
 
-# Optionnel : afficher la légende des classes
-with st.expander("📘 Voir les correspondances des classes encodées"):
-    for code, label in classes.items():
-        st.write(f"**{code}** → {label}")
+    with st.expander("📘 Voir les correspondances des classes encodées"):
+        for code, label in classes.items():
+            st.write(f"**{code}** → {label}")
 
 
 
