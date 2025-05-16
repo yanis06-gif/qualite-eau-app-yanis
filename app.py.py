@@ -97,10 +97,18 @@ st.subheader("📊 Gestion des prélèvements journaliers")
 
 # === Initialisation session state ===
 if 'df_prelèvements' not in st.session_state:
-    st.session_state.df_prelèvements = pd.DataFrame()
+    st.session_state.df_prelèvements = pd.read_pickle("prelevements_sauvegarde.pkl") if "prelevements_sauvegarde.pkl" in st.session_state else pd.DataFrame()
 
 # === Formulaire de saisie ===
 st.markdown("### 📝 Saisie d’un nouveau prélèvement")
+
+# Liste des 23 paramètres physico-chimiques et bactériologiques
+parametres = [
+    'Total Coliform', 'Escherichia Coli', 'Faecal Streptococci', 'Turbidity', 'pH', 'Temperature',
+    'Free Chlorine', 'Chlorates', 'Sulfate', 'Magnesium', 'Calcium', 'Conductivity', 'Dry Residue',
+    'Complete Alkaline Title', 'Nitrite', 'Ammonium', 'Phosphate', 'Nitrate', 'Iron', 'Manganese',
+    'Colour', 'Smell', 'Taste'
+]
 
 with st.form(key="saisie_prelevement"):
     date = st.date_input("Date du prélèvement", value=datetime.today())
@@ -111,11 +119,10 @@ with st.form(key="saisie_prelevement"):
     preleveur = st.text_input("Nom du préleveur")
     analyste = st.text_input("Nom de l’analyste")
 
-    # Quelques paramètres d'exemple
-    pH = st.number_input("pH", value=7.0)
-    temperature = st.number_input("Température (°C)", value=20.0)
-    chlore = st.number_input("Chlore libre (mg/L)", value=0.5)
-    turbidite = st.number_input("Turbidité (NTU)", value=0.3)
+    # Paramètres mesurés
+    resultats = {}
+    for param in parametres:
+        resultats[param] = st.number_input(param, value=0.0, format="%.4f")
 
     submitted = st.form_submit_button("Ajouter le prélèvement")
 
@@ -128,14 +135,13 @@ with st.form(key="saisie_prelevement"):
             "Code": code,
             "Préleveur": preleveur,
             "Analyste": analyste,
-            "pH": pH,
-            "Température": temperature,
-            "Chlore libre": chlore,
-            "Turbidité": turbidite
         }
+        new_data.update(resultats)
         new_df = pd.DataFrame([new_data])
         st.session_state.df_prelèvements = pd.concat([st.session_state.df_prelèvements, new_df], ignore_index=True)
         st.success("✅ Prélèvement ajouté avec succès")
+        # Sauvegarde permanente
+        st.session_state.df_prelèvements.to_pickle("prelevements_sauvegarde.pkl")
 
 # === Affichage du tableau ===
 st.markdown("### 📋 Prélèvements enregistrés")
