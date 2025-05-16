@@ -5,13 +5,6 @@ import joblib
 import os
 from PIL import Image
 
-classes = {
-    3: "Très bonne",
-    0: "Bonne",
-    2: "Moyenne",
-    1: "Mauvaise",
-    4: "Très mauvaise"
-}
 
 # Configuration de la page
 st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", layout="centered")
@@ -61,6 +54,13 @@ if mode == "🔍 Prédire un paramètre manquant":
         st.success(f"🔍 Prédiction pour **{parametre_cible}** : `{prediction[0]:.4f}`")
 
 # === Mode 2 : Classification de la qualité de l'eau ===
+classes = {
+    3: "Très bonne",
+    0: "Bonne",
+    2: "Moyenne",
+    1: "Mauvaise",
+    4: "Très mauvaise"
+}
 elif mode == "🧪 Classifier la qualité de l’eau":
     st.subheader("🧪 Classification de la qualité de l’eau")
 
@@ -69,18 +69,18 @@ elif mode == "🧪 Classifier la qualité de l’eau":
         val = st.number_input(param, value=0.0, format="%.4f")
         valeurs.append(val)
 
- if st.button("Prédire la classe de qualité"):
-    try:
-        model = joblib.load("modele_Classification.pkl")
-        X_input = np.array(valeurs).reshape(1, -1)
-        prediction = model.predict(X_input)
-        classe = classes.get(prediction[0], "Inconnue")
-        st.success(f"✅ Classe prédite : **{classe}**")
-    except Exception as e:
-        st.error(f"Erreur lors de la prédiction : {e}")
-
+    if st.button("Prédire la classe de qualité"):
+        try:
+            model = joblib.load("modele_classification.pkl")
+            X_input = np.array(valeurs).reshape(1, -1)
+            prediction = model.predict(X_input)
+            classe = classes.get(prediction[0], "Inconnue")
+            st.success(f"✅ Classe prédite : **{classe}**")
+        except Exception as e:
+            st.error(f"Erreur lors de la prédiction : {e}")
 with st.expander("📘 Voir les correspondances des classes encodées"):
     for code, label in classes.items():
         st.write(f"**{code}** → {label}")
+
 
 
