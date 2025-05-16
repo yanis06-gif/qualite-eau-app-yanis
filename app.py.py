@@ -59,7 +59,7 @@ tabs = st.tabs(["🔍 Prédiction", "🧪 Classification", "📋 Gestion des pr�
 with tabs[0]:
     st.header("🔍 Prédiction d’un paramètre manquant")
 
-    parametre_cible = st.selectbox("Quel paramètre veux-tu prédire ?", parametres)
+    parametre_cible = st.selectbox("Quel paramètre veux-tu prédire ?", parametres, key="pred_cible")
     model_filename = f"modele_{parametre_cible.replace(' ', '_')}.pkl"
 
     if not os.path.exists(model_filename):
@@ -69,9 +69,9 @@ with tabs[0]:
         valeurs = {}
         for param in parametres:
             if param != parametre_cible:
-                valeurs[param] = st.number_input(param, value=0.0, format="%.4f")
+                valeurs[param] = st.number_input(param, value=0.0, format="%.4f", key=f"pred_{param}")
 
-        if st.button("Prédire le paramètre manquant"):
+        if st.button("Prédire le paramètre manquant", key="pred_button"):
             X_input = np.array([valeurs[param] for param in parametres if param != parametre_cible]).reshape(1, -1)
             prediction = model.predict(X_input)
             st.success(f"🔍 Prédiction pour **{parametre_cible}** : `{prediction[0]:.4f}`")
@@ -91,9 +91,9 @@ with tabs[1]:
 
     valeurs = {}
     for param in parametres:
-        valeurs[param] = st.number_input(param, value=0.0, format="%.4f")
+        valeurs[param] = st.number_input(param, value=0.0, format="%.4f", key=f"classif_{param}")
 
-    if st.button("Prédire la classe de qualité"):
+    if st.button("Prédire la classe de qualité", key="classif_button"):
         try:
             model = joblib.load("modele_Classification.pkl")
             X_input = np.array([valeurs[param] for param in parametres]).reshape(1, -1)
@@ -134,36 +134,36 @@ with tabs[2]:
     with st.form(key="saisie_prelevement"):
         col1, col2 = st.columns(2)
         with col1:
-            date = st.date_input("Date du prélèvement", value=datetime.today())
-            entreprise = st.text_input("Nom de l’entreprise")
-            code = st.text_input("Code de l’échantillon")
-            preleveur = st.text_input("Nom du préleveur")
+            date = st.date_input("Date du prélèvement", value=datetime.today(), key="gestion_date")
+            entreprise = st.text_input("Nom de l’entreprise", key="gestion_entreprise")
+            code = st.text_input("Code de l’échantillon", key="gestion_code")
+            preleveur = st.text_input("Nom du préleveur", key="gestion_preleveur")
         with col2:
-            heure = st.time_input("Heure du prélèvement")
-            localisation = st.text_input("Localisation")
-            analyste = st.text_input("Nom de l’analyste")
+            heure = st.time_input("Heure du prélèvement", key="gestion_heure")
+            localisation = st.text_input("Localisation", key="gestion_localisation")
+            analyste = st.text_input("Nom de l’analyste", key="gestion_analyste")
 
         st.markdown("### 🔬 Résultats des analyses")
         resultats = {}
         for param in parametres:
-            resultats[param] = st.number_input(param, value=0.0, format="%.4f", key=f"saisie_{param}")
+            resultats[param] = st.number_input(param, value=0.0, format="%.4f", key=f"gestion_{param}")
 
         # Affichage paramètres dynamiques existants
         if st.session_state.parametres_dynamiques:
             st.markdown("### ⚙️ Paramètres personnalisés ajoutés")
             for p, v in st.session_state.parametres_dynamiques.items():
-                resultats[p] = st.number_input(p, value=float(v), format="%.4f", key=f"saisie_dyn_{p}")
+                resultats[p] = st.number_input(p, value=float(v), format="%.4f", key=f"gestion_dyn_{p}")
 
         # Section ajout paramètre personnalisé
         with st.expander("➕ Ajouter un paramètre personnalisé"):
-            nouveau_param = st.text_input("Nom du paramètre")
-            valeur_param = st.number_input("Valeur", value=0.0, format="%.4f")
-            if st.button("Ajouter ce paramètre"):
+            nouveau_param = st.text_input("Nom du paramètre", key="new_param_name")
+            valeur_param = st.number_input("Valeur", value=0.0, format="%.4f", key="new_param_value")
+            if st.button("Ajouter ce paramètre", key="add_param_button"):
                 if nouveau_param.strip() != "":
                     st.session_state.parametres_dynamiques[nouveau_param.strip()] = valeur_param
                     st.success(f"✅ Paramètre '{nouveau_param.strip()}' ajouté.")
 
-        submitted = st.form_submit_button("Ajouter le prélèvement")
+        submitted = st.form_submit_button("Ajouter le prélèvement", key="submit_prelevement")
         if submitted:
             new_data = {
                 "Date": date, "Heure": heure, "Entreprise": entreprise,
@@ -171,9 +171,11 @@ with tabs[2]:
                 "Préleveur": preleveur, "Analyste": analyste
             }
             new_data.update(resultats)
+            
+             st.session_state.df_prelèvements = pd.concat([st.session_state.df_prelèvements, pd.DataFrame([new_data])], ignore_index=True)
+            st.session_state.df_prelèvements.to
 
-            st.session_state.df_prelèvements = pd.concat([st.session_state.df_prelèvements, pd.DataFrame([new_data])], ignore_index=True)
-            st.session_state.df_prelèvements.to_pickle("prelevements_sauvegarde.pkl")
+                        st.session_state.df_prelèvements.to_pickle("prelevements_sauvegarde.pkl")
             st.success("✅ Prélèvement ajouté avec succès")
 
             # Afficher alertes normes
@@ -184,15 +186,15 @@ with tabs[2]:
             else:
                 st.success("✅ Tous les paramètres respectent les normes.")
 
-        # Filtrage des prélèvements
+    # Filtrage des prélèvements
     st.markdown("### 🔍 Filtrer les prélèvements")
     df = st.session_state.df_prelèvements.copy()
     if not df.empty:
         with st.expander("🗂️ Filtres avancés"):
             entreprises = df['Entreprise'].dropna().unique().tolist()
-            selected_entreprise = st.selectbox("Entreprise", ["Toutes"] + entreprises)
+            selected_entreprise = st.selectbox("Entreprise", ["Toutes"] + entreprises, key="filtre_entreprise")
             dates = df['Date'].astype(str).dropna().unique().tolist()
-            selected_date = st.selectbox("Date du prélèvement", ["Toutes"] + sorted(dates))
+            selected_date = st.selectbox("Date du prélèvement", ["Toutes"] + sorted(dates), key="filtre_date")
 
             if selected_entreprise != "Toutes":
                 df = df[df['Entreprise'] == selected_entreprise]
@@ -202,7 +204,8 @@ with tabs[2]:
         # Choix de la période pour la visualisation
         periode = st.selectbox(
             "Choisir la période de comparaison",
-            ["Journalière", "Mensuelle", "Annuelle"]
+            ["Journalière", "Mensuelle", "Annuelle"],
+            key="periode_comparaison"
         )
 
         # Agrégation selon la période choisie
@@ -236,7 +239,8 @@ with tabs[2]:
         selected_params = st.multiselect(
             "Sélectionne un ou plusieurs paramètres à tracer :",
             parametres + list(st.session_state.parametres_dynamiques.keys()) if st.session_state.parametres_dynamiques else parametres,
-            default=["pH", "Temperature"]
+            default=["pH", "Temperature"],
+            key="select_params_graph"
         )
 
         if selected_params:
@@ -270,7 +274,7 @@ with tabs[2]:
 
     # Importation fichier Excel ou CSV
     st.markdown("### 📁 Importer un fichier Excel ou CSV")
-    uploaded_file = st.file_uploader("Choisissez un fichier", type=["xlsx", "csv"])
+    uploaded_file = st.file_uploader("Choisissez un fichier", type=["xlsx", "csv"], key="upload_file")
     if uploaded_file:
         try:
             if uploaded_file.name.endswith(".csv"):
