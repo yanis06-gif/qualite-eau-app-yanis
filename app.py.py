@@ -166,7 +166,7 @@ if uploaded_file:
         st.dataframe(raw_df.head(10))
 
         # Tentative de lecture avec skiprows
-        df_import = pd.read_excel(xls, sheet_name=selected_sheet, skiprows=10)
+        df_import = pd.read_excel(xls, sheet_name=selected_sheet, skiprows=20)
 
         if df_import.empty:
             st.warning("⚠️ Données toujours vides. Essaie d’augmenter la valeur de `skiprows`.")
