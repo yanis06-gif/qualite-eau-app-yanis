@@ -131,7 +131,7 @@ with tabs[2]:
         st.session_state.parametres_dynamiques = {}
 
     # Formulaire saisie nouveau prélèvement
-    with st.form(key="saisie_prelevement"):
+with st.form(key="saisie_prelevement"):
     col1, col2 = st.columns(2)
     with col1:
         date = st.date_input("Date du prélèvement", value=datetime.today(), key="gestion_date")
@@ -148,7 +148,7 @@ with tabs[2]:
     for param in parametres:
         resultats[param] = st.number_input(param, value=0.0, format="%.4f", key=f"gestion_{param}")
 
-    # Paramètres dynamiques ajoutés
+    # Affichage des paramètres personnalisés ajoutés dynamiquement
     if st.session_state.parametres_dynamiques:
         st.markdown("### ⚙️ Paramètres personnalisés ajoutés")
         for p, v in st.session_state.parametres_dynamiques.items():
@@ -165,13 +165,20 @@ with tabs[2]:
     submitted = st.form_submit_button("Ajouter le prélèvement", key="submit_prelevement")
     if submitted:
         new_data = {
-            "Date": date, "Heure": heure, "Entreprise": entreprise,
-            "Localisation": localisation, "Code": code,
-            "Préleveur": preleveur, "Analyste": analyste
+            "Date": date,
+            "Heure": heure,
+            "Entreprise": entreprise,
+            "Localisation": localisation,
+            "Code": code,
+            "Préleveur": preleveur,
+            "Analyste": analyste
         }
         new_data.update(resultats)
 
-        st.session_state.df_prelèvements = pd.concat([st.session_state.df_prelèvements, pd.DataFrame([new_data])], ignore_index=True)
+        st.session_state.df_prelèvements = pd.concat(
+            [st.session_state.df_prelèvements, pd.DataFrame([new_data])],
+            ignore_index=True
+        )
         st.session_state.df_prelèvements.to_pickle("prelevements_sauvegarde.pkl")
         st.success("✅ Prélèvement ajouté avec succès")
 
@@ -181,6 +188,7 @@ with tabs[2]:
                 st.warning(msg)
         else:
             st.success("✅ Tous les paramètres respectent les normes.")
+
 
     # Filtrage des prélèvements
     st.markdown("### 🔍 Filtrer les prélèvements")
