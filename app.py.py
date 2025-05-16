@@ -230,3 +230,39 @@ with tabs[4]:
             st.warning("Erreur lors de la génération du fichier.")
     else:
         st.info("Aucune donnée à exporter.")
+
+# ==========================
+# 📘 ÉTHIQUE ET TRANSPARENCE
+# ==========================
+with st.sidebar.expander("ℹ️ À propos de cette application"):
+    st.markdown("""
+    **Développée par :** Votre Équipe IA 🧠  
+    **Objectif :** Améliorer la surveillance de la qualité de l'eau potable en Algérie.  
+    **Modèles utilisés :** Random Forest Regressor & Classifier.  
+    """)
+
+with st.tabs(["🔍 Prédiction", "🧪 Classification", "📋 Gestion", "📊 Visualisation", "📤 Export", "📘 Éthique et transparence"])[5]:
+    st.header("📘 Éthique et transparence")
+
+    st.markdown("""
+    ### 🤖 Utilisation de l'intelligence artificielle
+    Cette application utilise des modèles de machine learning pour aider à prédire et classifier la qualité de l'eau potable, à partir de données physico-chimiques et bactériologiques.
+
+    - Les modèles ont été entraînés à partir de données historiques, validées.
+    - Les résultats sont fournis à titre indicatif, et **ne remplacent pas une expertise humaine ou un avis technique**.
+
+    ### 🔐 Respect de la vie privée et des données
+    - Les données enregistrées localement (sur votre machine ou serveur personnel) ne sont **ni partagées, ni transmises** à un serveur externe.
+    - Aucun traitement automatique de données à caractère personnel n’est effectué.
+
+    ### ⚠️ Limitations des prédictions
+    - La précision dépend fortement de la qualité et de la complétude des données saisies.
+    - En cas de doute, une analyse en laboratoire reste **indispensable**.
+
+    ### ✅ Engagement qualité
+    Cette application respecte les normes algériennes de qualité de l’eau potable (NA 6361-2016).  
+    Elle est conçue pour être **transparente, pédagogique et évolutive**.
+
+    ### 📩 Contact
+    Pour améliorer ou contribuer à ce projet, contactez-nous à : `contact@equipe-eau-dz.dz`
+    """)
