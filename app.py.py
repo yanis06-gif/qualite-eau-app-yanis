@@ -280,8 +280,6 @@ with st.form(key="saisie_prelevement"):
     else:
         st.info("Aucun prélèvement à afficher.")
 
-   import io
-
 def to_excel(df_to_export):
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
