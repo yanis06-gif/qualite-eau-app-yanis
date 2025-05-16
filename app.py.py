@@ -163,12 +163,16 @@ with tabs[2]:
                     st.session_state.parametres_dynamiques[nouveau_param.strip()] = valeur_param
                     st.success(f"✅ Paramètre '{nouveau_param.strip()}' ajouté.")
 
-        submitted = st.form_submit_button("Ajouter le prélèvement", key="submit_prelevement")
+      submitted = st.form_submit_button("Ajouter le prélèvement", key="submit_prelevement")
 if submitted:
     new_data = {
         "Date": date,
         "Heure": heure,
-        # ... autres champs ...
+        "Entreprise": entreprise,
+        "Localisation": localisation,
+        "Code": code,
+        "Préleveur": preleveur,
+        "Analyste": analyste
     }
     new_data.update(resultats)
 
@@ -178,14 +182,13 @@ if submitted:
     st.session_state.df_prelèvements.to_pickle("prelevements_sauvegarde.pkl")
     st.success("✅ Prélèvement ajouté avec succès")
 
+    alertes = verifier_parametres_entres(new_data)
+    if alertes:
+        for msg in alertes:
+            st.warning(msg)
+    else:
+        st.success("✅ Tous les paramètres respectent les normes.")
 
-            # Afficher alertes normes
-            alertes = verifier_parametres_entres(new_data)
-            if alertes:
-                for msg in alertes:
-                    st.warning(msg)
-            else:
-                st.success("✅ Tous les paramètres respectent les normes.")
 
     # Filtrage des prélèvements
     st.markdown("### 🔍 Filtrer les prélèvements")
