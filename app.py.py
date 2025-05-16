@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 import joblib
 import os
+import io  # <- Doit être ici, sans indentation
 from PIL import Image
-import io
 from datetime import datetime
 import matplotlib.pyplot as plt
 
