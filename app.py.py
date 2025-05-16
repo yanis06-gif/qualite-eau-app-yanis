@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 
 
 # Configuration de la page
-st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", layout="centered")
 st.set_page_config(page_title="Gestion des Prélèvements", layout="wide")
+st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", layout="centered")
 
 
 # Titre
