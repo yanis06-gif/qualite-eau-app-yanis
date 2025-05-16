@@ -8,8 +8,9 @@ st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", lay
 
 st.title("💧 Application IA pour la prédiction des paramètres de l'eau potable")
 
-image_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Water_drop_001.jpg/800px-Water_drop_001.jpg"
-st.image(image_url, caption="Analyse de la qualité de l'eau", use_column_width=True)
+image_url = "https://upload.wikimedia.org/wikipedia/commons/1/14/Water_Droplet_On_Leaf_-_Close_Up.JPG"
+st.image(image_url, caption="Test image alternative", use_column_width=True)
+
 
 
 
@@ -34,7 +35,7 @@ Elle permet de **prédire un paramètre manquant** parmi 23 mesures de qualité 
 
 ---
 
-> Développé avec ❤️ par [TonNom]  
+> Développé avec ❤️ par Yanis  
 > Basé sur un modèle Random Forest Regressor
 """)
 import streamlit as st
