@@ -4,7 +4,8 @@ import pandas as pd
 import joblib
 import os
 from PIL import Image
-
+import io
+from datetime import datetime
 
 # Configuration de la page
 st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", layout="centered")
@@ -91,11 +92,6 @@ elif mode == "🧪 Classifier la qualité de l’eau":
     with st.expander("📘 Voir les correspondances des classes encodées"):
         for code, label in classes.items():
             st.write(f"**{code}** → {label}")
-
-           import streamlit as st
-import pandas as pd
-import io
-from datetime import datetime
 
 st.subheader("📊 Gestion des prélèvements journaliers")
 
