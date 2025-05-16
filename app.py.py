@@ -131,6 +131,18 @@ with tabs[2]:
         st.session_state.parametres_dynamiques = {}
 
     # Formulaire saisie nouveau prélèvement
+# === Gestion des paramètres personnalisés (en dehors du formulaire) ===
+st.markdown("### ➕ Ajouter un paramètre personnalisé")
+nouveau_param = st.text_input("Nom du paramètre", key="new_param_name")
+valeur_param = st.number_input("Valeur", value=0.0, format="%.4f", key="new_param_value")
+if st.button("Ajouter ce paramètre", key="add_param_button"):
+    if nouveau_param.strip() != "":
+        if 'parametres_dynamiques' not in st.session_state:
+            st.session_state.parametres_dynamiques = {}
+        st.session_state.parametres_dynamiques[nouveau_param.strip()] = valeur_param
+        st.success(f"✅ Paramètre '{nouveau_param.strip()}' ajouté.")
+
+# === Formulaire principal de saisie d’un nouveau prélèvement ===
 with st.form(key="saisie_prelevement"):
     col1, col2 = st.columns(2)
     with col1:
@@ -148,21 +160,13 @@ with st.form(key="saisie_prelevement"):
     for param in parametres:
         resultats[param] = st.number_input(param, value=0.0, format="%.4f", key=f"gestion_{param}")
 
-    # Affichage des paramètres personnalisés ajoutés dynamiquement
-    if st.session_state.parametres_dynamiques:
+    # Intégration des paramètres personnalisés
+    if 'parametres_dynamiques' in st.session_state and st.session_state.parametres_dynamiques:
         st.markdown("### ⚙️ Paramètres personnalisés ajoutés")
         for p, v in st.session_state.parametres_dynamiques.items():
             resultats[p] = st.number_input(p, value=float(v), format="%.4f", key=f"gestion_dyn_{p}")
 
-    with st.expander("➕ Ajouter un paramètre personnalisé"):
-        nouveau_param = st.text_input("Nom du paramètre", key="new_param_name")
-        valeur_param = st.number_input("Valeur", value=0.0, format="%.4f", key="new_param_value")
-        if st.button("Ajouter ce paramètre", key="add_param_button"):
-            if nouveau_param.strip() != "":
-                st.session_state.parametres_dynamiques[nouveau_param.strip()] = valeur_param
-                st.success(f"✅ Paramètre '{nouveau_param.strip()}' ajouté.")
-
-    submitted = st.form_submit_button("Ajouter le prélèvement", key="submit_prelevement")
+    submitted = st.form_submit_button("Ajouter le prélèvement", type="primary")
     if submitted:
         new_data = {
             "Date": date,
@@ -182,12 +186,16 @@ with st.form(key="saisie_prelevement"):
         st.session_state.df_prelèvements.to_pickle("prelevements_sauvegarde.pkl")
         st.success("✅ Prélèvement ajouté avec succès")
 
+        # Vérification normes
         alertes = verifier_parametres_entres(new_data)
         if alertes:
             for msg in alertes:
                 st.warning(msg)
         else:
             st.success("✅ Tous les paramètres respectent les normes.")
+
+
+
 
 
     # Filtrage des prélèvements
