@@ -157,16 +157,18 @@ uploaded_file = st.file_uploader("📁 Importer un fichier Excel", type=["xlsx"]
 if uploaded_file:
     try:
         xls = pd.ExcelFile(uploaded_file)
-        st.write("📄 Feuilles détectées :", xls.sheet_names)
-        selected_sheet = st.selectbox("Sélectionne la feuille à importer :", xls.sheet_names)
+        st.write("📄 Feuilles disponibles :", xls.sheet_names)
+        selected_sheet = st.selectbox("🧾 Sélectionne la feuille :", xls.sheet_names)
 
-        # Aperçu brut pour identifier le bon skiprows
+        st.markdown("### 🔍 Aperçu brut du contenu (aucun skip, aucune colonne)")
         raw_df = pd.read_excel(xls, sheet_name=selected_sheet, header=None)
-        st.write("🔍 Premières lignes du fichier brut :")
-        st.dataframe(raw_df.head(10))
+        st.dataframe(raw_df)
+
+    except Exception as e:
+        st.error(f"❌ Erreur de lecture : {e}")
 
         # Tentative de lecture avec skiprows
-        df_import = pd.read_excel(xls, sheet_name=selected_sheet, skiprows=100)
+        df_import = pd.read_excel(xls, sheet_name=selected_sheet, skiprows=1000)
 
         if df_import.empty:
             st.warning("⚠️ Données toujours vides. Essaie d’augmenter la valeur de `skiprows`.")
