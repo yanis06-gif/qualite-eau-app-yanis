@@ -56,9 +56,8 @@ if mode == "🔍 Prédire un paramètre manquant":
 # === Mode 2 : Classification de la qualité de l'eau ===
 
 elif mode == "🧪 Classifier la qualité de l’eau":
-    st.subheader("🧪 Classification de la qualité de l’eau")
-
-# Dictionnaire de correspondance des classes encodées
+   
+   # Dictionnaire de correspondance des classes encodées
 classes = {
     3: "Très bonne",
     0: "Bonne",
