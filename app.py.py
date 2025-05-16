@@ -152,28 +152,31 @@ def to_excel(df):
 
 
 # Upload d'un fichier Excel ou CSV
-uploaded_file = st.file_uploader("📁 Importer un fichier Excel ou CSV", type=["xlsx", "csv"])
+uploaded_file = st.file_uploader("📁 Importer un fichier Excel", type=["xlsx"])
 
 if uploaded_file:
     try:
-        if uploaded_file.name.endswith('.csv'):
-            df_import = pd.read_csv(uploaded_file)
-        else:
-            xls = pd.ExcelFile(uploaded_file)
-            st.write("📄 Feuilles détectées :", xls.sheet_names)
-            selected_sheet = st.selectbox("Sélectionne la feuille à importer :", xls.sheet_names)
-            df_import = pd.read_excel(xls, sheet_name=selected_sheet)
+        xls = pd.ExcelFile(uploaded_file)
+        st.write("📄 Feuilles détectées :", xls.sheet_names)
+        selected_sheet = st.selectbox("Sélectionne la feuille à importer :", xls.sheet_names)
+
+        # Aperçu brut pour identifier le bon skiprows
+        raw_df = pd.read_excel(xls, sheet_name=selected_sheet, header=None)
+        st.write("🔍 Premières lignes du fichier brut :")
+        st.dataframe(raw_df.head(10))
+
+        # Tentative de lecture avec skiprows
+        df_import = pd.read_excel(xls, sheet_name=selected_sheet, skiprows=4)
 
         if df_import.empty:
-            st.warning("⚠️ Le fichier a été chargé mais aucune donnée n’a été trouvée. Vérifie l’emplacement du tableau ou essaie avec `skiprows=`.")
+            st.warning("⚠️ Données toujours vides. Essaie d’augmenter la valeur de `skiprows`.")
         else:
             st.success("✅ Données importées avec succès !")
             st.dataframe(df_import)
     except Exception as e:
-        st.error(f"❌ Erreur lors de l’importation : {e}")
+        st.error(f"❌ Erreur : {e}")
 
-
-    # Tu peux ensuite choisir de fusionner avec st.session_state.df_prelèvements ou autre traitement
+# Tu peux ensuite choisir de fusionner avec st.session_state.df_prelèvements ou autre traitement
 
 
 
