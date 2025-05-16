@@ -144,12 +144,12 @@ def to_excel(df):
     return output.getvalue()
 
 # Bouton pour télécharger le fichier Excel
-if not st.session_state.df_prelèvements.empty:
-    excel_data = to_excel(st.session_state.df_prelèvements)
-    st.download_button(label='📥 Télécharger les prélèvements en Excel',
-                       data=excel_data,
-                       file_name='prelevements_journaliers.xlsx',
-                       mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+def to_excel(df):
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='Prélèvements')
+    return output.getvalue()
+
 
 # Upload d'un fichier Excel ou CSV
 uploaded_file = st.file_uploader("📁 Importer un fichier Excel ou CSV", type=["xlsx", "csv"])
