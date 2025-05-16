@@ -85,3 +85,27 @@ if st.button("Prédire le paramètre manquant"):
     X_input = np.array(valeurs, dtype=np.float64).reshape(1, -1)
     prediction = model.predict(X_input)
     st.success(f"🔍 Prédiction pour **{parametre_cible}** : `{prediction[0]:.4f}`")
+
+st.sidebar.title("🔧 Menu")
+mode = st.sidebar.radio("Choisir une action :", ("🔍 Prédire un paramètre manquant", "🧪 Classifier la qualité de l’eau"))
+
+if mode == "🔍 Prédire un paramètre manquant":
+    # Ton code actuel ici (avec la liste des paramètres, les inputs, et la prédiction)
+
+elif mode == "🧪 Classifier la qualité de l’eau":
+    st.subheader("🧪 Classification de la qualité de l’eau")
+
+    valeurs = []
+    for param in parametres:
+        val = st.number_input(param, value=0.0, format="%.4f")
+        valeurs.append(val)
+
+    if st.button("Prédire la classe de qualité"):
+        try:
+            model = joblib.load("modele_classification.pkl")
+            X_input = np.array(valeurs).reshape(1, -1)
+            prediction = model.predict(X_input)
+            st.success(f"✅ Classe prédite : **{prediction[0]}**")
+        except Exception as e:
+            st.error(f"Erreur lors de la prédiction : {e}")
+
