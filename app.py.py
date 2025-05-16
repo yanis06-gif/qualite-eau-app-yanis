@@ -164,19 +164,20 @@ with tabs[2]:
                     st.success(f"✅ Paramètre '{nouveau_param.strip()}' ajouté.")
 
         submitted = st.form_submit_button("Ajouter le prélèvement", key="submit_prelevement")
-        if submitted:
-            new_data = {
-                "Date": date, "Heure": heure, "Entreprise": entreprise,
-                "Localisation": localisation, "Code": code,
-                "Préleveur": preleveur, "Analyste": analyste
-            }
-            new_data.update(resultats)
-            
-             st.session_state.df_prelèvements = pd.concat([st.session_state.df_prelèvements, pd.DataFrame([new_data])], ignore_index=True)
-            st.session_state.df_prelèvements.to
+if submitted:
+    new_data = {
+        "Date": date,
+        "Heure": heure,
+        # ... autres champs ...
+    }
+    new_data.update(resultats)
 
-                        st.session_state.df_prelèvements.to_pickle("prelevements_sauvegarde.pkl")
-            st.success("✅ Prélèvement ajouté avec succès")
+    st.session_state.df_prelèvements = pd.concat(
+        [st.session_state.df_prelèvements, pd.DataFrame([new_data])], ignore_index=True
+    )
+    st.session_state.df_prelèvements.to_pickle("prelevements_sauvegarde.pkl")
+    st.success("✅ Prélèvement ajouté avec succès")
+
 
             # Afficher alertes normes
             alertes = verifier_parametres_entres(new_data)
