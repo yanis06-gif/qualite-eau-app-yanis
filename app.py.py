@@ -68,9 +68,7 @@ elif mode == "🧪 Classifier la qualité de l’eau":
     1: "Mauvaise",
     4: "Très mauvaise"
 }
-
-
-   if st.button("Prédire la classe de qualité"):
+ if st.button("Prédire la classe de qualité"):
     try:
         model = joblib.load("modele_Classification.pkl")
         X_input = np.array(valeurs).reshape(1, -1)
