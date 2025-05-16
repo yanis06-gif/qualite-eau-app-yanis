@@ -264,5 +264,5 @@ with st.tabs(["🔍 Prédiction", "🧪 Classification", "📋 Gestion", "📊 V
     Elle est conçue pour être **transparente, pédagogique et évolutive**.
 
     ### 📩 Contact
-    Pour améliorer ou contribuer à ce projet, contactez-nous à : `contact@equipe-eau-dz.dz`
+    Pour améliorer ou contribuer à ce projet, contactez-nous à : `yanisfth06@gmail.com`
     """)
