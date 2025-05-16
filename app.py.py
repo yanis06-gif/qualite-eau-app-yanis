@@ -92,5 +92,80 @@ elif mode == "🧪 Classifier la qualité de l’eau":
         for code, label in classes.items():
             st.write(f"**{code}** → {label}")
 
+            import pandas as pd
+import io
+
+st.subheader("📊 Gestion des prélèvements journaliers")
+
+# Liste étendue de paramètres (exemple, tu pourras l'ajuster)
+parametres_etendus = [
+    'Date', 'Heure', 'Nom de l’entreprise', 'Localisation', 'Technicien', 
+    'Total Coliform', 'Escherichia Coli', 'Faecal Streptococci', 'Turbidity', 
+    'pH', 'Temperature', 'Free Chlorine', 'Chlorates', 'Sulfate', 'Magnesium', 
+    'Calcium', 'Conductivity', 'Dry Residue', 'Complete Alkaline Title', 
+    'Nitrite', 'Ammonium', 'Phosphate', 'Nitrate', 'Iron', 'Manganese', 
+    'Colour', 'Smell', 'Taste'
+]
+
+# Saisie manuelle via formulaire
+st.write("📝 Saisie manuelle des prélèvements")
+
+donnees = {}
+for param in parametres_etendus:
+    if param == 'Date':
+        donnees[param] = st.date_input(param)
+    elif param == 'Heure':
+        donnees[param] = st.time_input(param)
+    elif param == 'Nom de l’entreprise':
+        donnees[param] = st.text_input(param)
+    elif param == 'Localisation':
+        donnees[param] = st.text_input(param)
+    elif param == 'Technicien':
+        donnees[param] = st.text_input(param)
+    else:
+        donnees[param] = st.number_input(param, value=0.0, format="%.4f")
+
+# Button pour ajouter la ligne dans un dataframe stocké dans la session
+if 'df_prelèvements' not in st.session_state:
+    st.session_state.df_prelèvements = pd.DataFrame(columns=parametres_etendus)
+
+if st.button("Ajouter ce prélèvement"):
+    nouvelle_ligne = pd.DataFrame([donnees])
+    st.session_state.df_prelèvements = pd.concat([st.session_state.df_prelèvements, nouvelle_ligne], ignore_index=True)
+    st.success("✅ Prélèvement ajouté !")
+
+# Affiche le tableau des prélèvements ajoutés
+st.write("📋 Tableau des prélèvements enregistrés :")
+st.dataframe(st.session_state.df_prelèvements)
+
+# Fonction pour exporter en Excel
+def to_excel(df):
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='Prélèvements')
+        writer.save()
+    return output.getvalue()
+
+# Bouton pour télécharger le fichier Excel
+if not st.session_state.df_prelèvements.empty:
+    excel_data = to_excel(st.session_state.df_prelèvements)
+    st.download_button(label='📥 Télécharger les prélèvements en Excel',
+                       data=excel_data,
+                       file_name='prelevements_journaliers.xlsx',
+                       mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+# Upload d'un fichier Excel ou CSV
+uploaded_file = st.file_uploader("📁 Importer un fichier Excel ou CSV", type=["xlsx", "csv"])
+
+if uploaded_file:
+    if uploaded_file.name.endswith('.csv'):
+        df_import = pd.read_csv(uploaded_file)
+    else:
+        df_import = pd.read_excel(uploaded_file)
+    st.write("Données importées :")
+    st.dataframe(df_import)
+    # Tu peux ensuite choisir de fusionner avec st.session_state.df_prelèvements ou autre traitement
+
+
 
 
