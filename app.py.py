@@ -111,19 +111,16 @@ parametres_etendus = [
 st.write("📝 Saisie manuelle des prélèvements")
 
 donnees = {}
-for param in parametres_etendus:
+for i, param in enumerate(parametres_etendus):
     if param == 'Date':
-        donnees[param] = st.date_input(param)
+        donnees[param] = st.date_input(param, key=f"{param}_{i}")
     elif param == 'Heure':
-        donnees[param] = st.time_input(param)
-    elif param == 'Nom de l’entreprise':
-        donnees[param] = st.text_input(param)
-    elif param == 'Localisation':
-        donnees[param] = st.text_input(param)
-    elif param == 'Technicien':
-        donnees[param] = st.text_input(param)
+        donnees[param] = st.time_input(param, key=f"{param}_{i}")
+    elif param in ['Nom de l’entreprise', 'Localisation', 'Technicien']:
+        donnees[param] = st.text_input(param, key=f"{param}_{i}")
     else:
-        donnees[param] = st.number_input(param, value=0.0, format="%.4f")
+        donnees[param] = st.number_input(param, value=0.0, format="%.4f", key=f"{param}_{i}")
+
 
 # Button pour ajouter la ligne dans un dataframe stocké dans la session
 if 'df_prelèvements' not in st.session_state:
