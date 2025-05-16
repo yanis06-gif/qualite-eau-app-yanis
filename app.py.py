@@ -1,9 +1,16 @@
+import streamlit as st
+import numpy as np
+import pandas as pd
+import joblib
+import os
+
 st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", layout="centered")
 
 st.title("💧 Application IA pour la prédiction des paramètres de l'eau potable")
 
 image_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Water_drop_001.jpg/800px-Water_drop_001.jpg"
 st.image(image_url, caption="Analyse de la qualité de l'eau", use_column_width=True)
+
 
 
 st.markdown("""
