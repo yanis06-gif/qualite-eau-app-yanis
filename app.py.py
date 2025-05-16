@@ -184,5 +184,102 @@ with tabs[2]:
             else:
                 st.success("✅ Tous les paramètres respectent les normes.")
 
-    # Filtrage des prélèvements
-    st.markdown("### 🔍 Filtrer les prél
+        # Filtrage des prélèvements
+    st.markdown("### 🔍 Filtrer les prélèvements")
+    df = st.session_state.df_prelèvements.copy()
+    if not df.empty:
+        with st.expander("🗂️ Filtres avancés"):
+            entreprises = df['Entreprise'].dropna().unique().tolist()
+            selected_entreprise = st.selectbox("Entreprise", ["Toutes"] + entreprises)
+            dates = df['Date'].astype(str).dropna().unique().tolist()
+            selected_date = st.selectbox("Date du prélèvement", ["Toutes"] + sorted(dates))
+
+            if selected_entreprise != "Toutes":
+                df = df[df['Entreprise'] == selected_entreprise]
+            if selected_date != "Toutes":
+                df = df[df['Date'].astype(str) == selected_date]
+
+        # Choix de la période pour la visualisation
+        periode = st.selectbox(
+            "Choisir la période de comparaison",
+            ["Journalière", "Mensuelle", "Annuelle"]
+        )
+
+        # Agrégation selon la période choisie
+        df['Date'] = pd.to_datetime(df['Date'])
+        if periode == "Mensuelle":
+            df_grouped = df.groupby(df['Date'].dt.to_period("M")).mean()
+            df_grouped.index = df_grouped.index.to_timestamp()
+        elif periode == "Annuelle":
+            df_grouped = df.groupby(df['Date'].dt.to_period("Y")).mean()
+            df_grouped.index = df_grouped.index.to_timestamp()
+        else:
+            df_grouped = df.set_index('Date')
+
+        st.markdown("### 📋 Tableau des prélèvements filtrés")
+        st.dataframe(df)
+
+        def to_excel(df_to_export):
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                df_to_export.to_excel(writer, index=False, sheet_name='Prélèvements')
+            return output.getvalue()
+
+        excel_data = to_excel(df)
+        st.download_button("📥 Télécharger (Excel)", data=excel_data,
+                           file_name="prelevements.xlsx",
+                           mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+        # Visualisation multi-paramètres avec codes couleurs selon normes
+        st.markdown("### 📊 Visualisation des paramètres")
+
+        selected_params = st.multiselect(
+            "Sélectionne un ou plusieurs paramètres à tracer :",
+            parametres + list(st.session_state.parametres_dynamiques.keys()) if st.session_state.parametres_dynamiques else parametres,
+            default=["pH", "Temperature"]
+        )
+
+        if selected_params:
+            fig, ax = plt.subplots(figsize=(10, 5))
+            for param in selected_params:
+                if param in df_grouped.columns:
+                    y = df_grouped[param]
+                    x = df_grouped.index
+
+                    # Gestion des couleurs selon normes si seuil défini
+                    if param in normes:
+                        seuil = normes[param]
+                        min_val = seuil.get("min", -float('inf'))
+                        max_val = seuil.get("max", float('inf'))
+                        in_range = (y >= min_val) & (y <= max_val)
+                        out_range = ~in_range
+
+                        ax.plot(x[in_range], y[in_range], 'go-', label=f"{param} (OK)")
+                        ax.plot(x[out_range], y[out_range], 'ro-', label=f"{param} (Hors norme)")
+                    else:
+                        ax.plot(x, y, marker='o', label=param)
+
+            ax.set_title(f"Évolution {periode.lower()} des paramètres sélectionnés")
+            ax.set_xlabel("Date")
+            ax.set_ylabel("Valeur")
+            ax.legend()
+            ax.grid(True)
+            st.pyplot(fig)
+    else:
+        st.info("Aucun prélèvement à afficher.")
+
+    # Importation fichier Excel ou CSV
+    st.markdown("### 📁 Importer un fichier Excel ou CSV")
+    uploaded_file = st.file_uploader("Choisissez un fichier", type=["xlsx", "csv"])
+    if uploaded_file:
+        try:
+            if uploaded_file.name.endswith(".csv"):
+                imported_df = pd.read_csv(uploaded_file)
+            else:
+                imported_df = pd.read_excel(uploaded_file)
+
+            st.success("✅ Données importées :")
+            st.dataframe(imported_df)
+        except Exception as e:
+            st.error(f"Erreur lors de l'importation : {e}")
+
