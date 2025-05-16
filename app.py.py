@@ -3,13 +3,16 @@ import numpy as np
 import pandas as pd
 import joblib
 import os
+from PIL import Image
+
 
 st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", layout="centered")
 
 st.title("💧 Application IA pour la prédiction des paramètres de l'eau potable")
 
-image_url = "https://upload.wikimedia.org/wikipedia/commons/1/14/Water_Droplet_On_Leaf_-_Close_Up.JPG"
-st.image(image_url, caption="Test image alternative", use_column_width=True)
+image = Image.open("eau.jpg")
+st.image(image, caption="Analyse de la qualité de l'eau", use_column_width=True)
+
 
 
 
