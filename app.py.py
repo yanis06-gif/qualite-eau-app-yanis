@@ -28,6 +28,10 @@ if st.session_state.page_active == "accueil":
         st.markdown("### 🌍 Projet IA - Qualité de l’Eau Potable en Algérie")
         st.markdown("Une plateforme intelligente de surveillance, d'analyse et de recommandation.")
         st.markdown("🧪 Basée sur des modèles d’intelligence artificielle appliqués à des données physico-chimiques et bactériologiques.")
+        st.markdown("---")
+if st.button("🚀 Entrer dans l'application"):
+        st.session_state.page_active = "application"
+    st.stop()    
 
     st.markdown("---")
 
@@ -47,14 +51,10 @@ if st.session_state.page_active == "accueil":
     st.markdown("---")
     st.markdown("### 🧑‍🔬 Développé par")
     st.markdown("**Équipe IA & Eau Potable – Algérie 🇩🇿**")
-    st.markdown("- Étudiant(e)s : Nom 1, Nom 2")
-    st.markdown("- Encadrant : Prénom NOM")
+    st.markdown("- Étudiant(e)s : FETOUH Yanis, AYAD Lewisa Lysa")
+    st.markdown("- Encadrant : BOUCHRAKI Faiza")
     st.markdown("- Structure : Laboratoire / Université")
 
-    st.markdown("---")
-    if st.button("🚀 Entrer dans l'application"):
-        st.session_state.page_active = "application"
-    st.stop()
 
 # Normes algériennes pour certains paramètres
 normes = {
