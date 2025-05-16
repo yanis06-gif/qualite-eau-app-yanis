@@ -12,6 +12,49 @@ import altair as alt
 
 # Configuration de la page
 st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", layout="wide")
+# ==========================
+# 🎉 Page d'accueil interactive
+# ==========================
+
+if "page_active" not in st.session_state:
+    st.session_state.page_active = "accueil"
+
+if st.session_state.page_active == "accueil":
+    col1, col2 = st.columns([1, 2])
+    with col1:
+        if os.path.exists("logo.png"):
+            st.image("logo.png", width=150)
+    with col2:
+        st.markdown("### 🌍 Projet IA - Qualité de l’Eau Potable en Algérie")
+        st.markdown("Une plateforme intelligente de surveillance, d'analyse et de recommandation.")
+        st.markdown("🧪 Basée sur des modèles d’intelligence artificielle appliqués à des données physico-chimiques et bactériologiques.")
+
+    st.markdown("---")
+
+    st.markdown("### ⚙️ Fonctionnalités principales :")
+    st.markdown("- 🔍 **Prédiction** d’un paramètre manquant à partir des autres")
+    st.markdown("- 🧪 **Classification** automatique de la qualité de l’eau")
+    st.markdown("- 📋 **Gestion complète** des prélèvements journaliers (saisie, export, filtres)")
+    st.markdown("- 📊 **Visualisation graphique** des données")
+    st.markdown("- 📘 **Conseils et transparence** selon la norme algérienne")
+
+    st.markdown("### 💡 Comment utiliser l’application ?")
+    st.markdown("1. Saisissez ou importez vos données d’analyse")
+    st.markdown("2. Lancez une prédiction ou une classification")
+    st.markdown("3. Consultez les alertes et conseils générés")
+    st.markdown("4. Téléchargez vos rapports sous forme de fichier Excel")
+
+    st.markdown("---")
+    st.markdown("### 🧑‍🔬 Développé par")
+    st.markdown("**Équipe IA & Eau Potable – Algérie 🇩🇿**")
+    st.markdown("- Étudiant(e)s : Nom 1, Nom 2")
+    st.markdown("- Encadrant : Prénom NOM")
+    st.markdown("- Structure : Laboratoire / Université")
+
+    st.markdown("---")
+    if st.button("🚀 Entrer dans l'application"):
+        st.session_state.page_active = "application"
+    st.stop()
 
 # Normes algériennes pour certains paramètres
 normes = {
