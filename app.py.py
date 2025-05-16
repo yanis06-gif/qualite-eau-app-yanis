@@ -159,15 +159,19 @@ if uploaded_file:
         if uploaded_file.name.endswith('.csv'):
             df_import = pd.read_csv(uploaded_file)
         else:
-            df_import = pd.read_excel(uploaded_file, sheet_name=0)
+            xls = pd.ExcelFile(uploaded_file)
+            st.write("📄 Feuilles détectées :", xls.sheet_names)
+            selected_sheet = st.selectbox("Sélectionne la feuille à importer :", xls.sheet_names)
+            df_import = pd.read_excel(xls, sheet_name=selected_sheet)
 
         if df_import.empty:
-            st.warning("⚠️ Le fichier semble vide ou mal formaté.")
+            st.warning("⚠️ Le fichier a été chargé mais aucune donnée n’a été trouvée. Vérifie l’emplacement du tableau ou essaie avec `skiprows=`.")
         else:
-            st.success("✅ Données importées avec succès :")
+            st.success("✅ Données importées avec succès !")
             st.dataframe(df_import)
     except Exception as e:
-        st.error(f"❌ Erreur lors de l'importation : {e}")
+        st.error(f"❌ Erreur lors de l’importation : {e}")
+
 
     # Tu peux ensuite choisir de fusionner avec st.session_state.df_prelèvements ou autre traitement
 
