@@ -4,4 +4,4 @@ pandas
 numpy
 joblib
 xlsxwriter
-openpyxl
+matplotlib
