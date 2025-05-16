@@ -155,12 +155,20 @@ def to_excel(df):
 uploaded_file = st.file_uploader("📁 Importer un fichier Excel ou CSV", type=["xlsx", "csv"])
 
 if uploaded_file:
-    if uploaded_file.name.endswith('.csv'):
-        df_import = pd.read_csv(uploaded_file)
-    else:
-        df_import = pd.read_excel(uploaded_file)
-    st.write("Données importées :")
-    st.dataframe(df_import)
+    try:
+        if uploaded_file.name.endswith('.csv'):
+            df_import = pd.read_csv(uploaded_file)
+        else:
+            df_import = pd.read_excel(uploaded_file, sheet_name=0)
+
+        if df_import.empty:
+            st.warning("⚠️ Le fichier semble vide ou mal formaté.")
+        else:
+            st.success("✅ Données importées avec succès :")
+            st.dataframe(df_import)
+    except Exception as e:
+        st.error(f"❌ Erreur lors de l'importation : {e}")
+
     # Tu peux ensuite choisir de fusionner avec st.session_state.df_prelèvements ou autre traitement
 
 
