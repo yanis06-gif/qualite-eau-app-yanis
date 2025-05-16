@@ -280,18 +280,23 @@ with st.form(key="saisie_prelevement"):
     else:
         st.info("Aucun prélèvement à afficher.")
 
-    # Importation fichier Excel ou CSV
-    st.markdown("### 📁 Importer un fichier Excel ou CSV")
-    uploaded_file = st.file_uploader("Choisissez un fichier", type=["xlsx", "csv"], key="upload_file")
-    if uploaded_file:
-        try:
-            if uploaded_file.name.endswith(".csv"):
-                imported_df = pd.read_csv(uploaded_file)
-            else:
-                imported_df = pd.read_excel(uploaded_file)
+   import io
 
-            st.success("✅ Données importées :")
-            st.dataframe(imported_df)
-        except Exception as e:
-            st.error(f"Erreur lors de l'importation : {e}")
+def to_excel(df_to_export):
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df_to_export.to_excel(writer, index=False, sheet_name='Prélèvements')
+    processed_data = output.getvalue()
+    return processed_data
+excel_data = to_excel(df)
+
+if excel_data:
+    st.download_button(
+        label="📥 Télécharger (Excel)",
+        data=excel_data,
+        file_name="prelevements.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+else:
+    st.error("Erreur : données à exporter non valides.")
 
