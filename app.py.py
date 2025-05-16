@@ -194,10 +194,6 @@ with st.form(key="saisie_prelevement"):
         else:
             st.success("✅ Tous les paramètres respectent les normes.")
 
-
-
-
-
     # Filtrage des prélèvements
     st.markdown("### 🔍 Filtrer les prélèvements")
     df = st.session_state.df_prelèvements.copy()
