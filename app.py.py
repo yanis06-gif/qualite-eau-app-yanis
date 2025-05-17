@@ -25,7 +25,7 @@ if st.session_state.page_active != "accueil":
     with st.sidebar:
         if st.button("🔙 Retour à l'accueil"):
             st.session_state.page_active = "accueil"
-            st.experimental_rerun()
+            st.stop()
 
 # ==========================
 # 🎉 PAGE D'ACCUEIL INTERACTIVE
