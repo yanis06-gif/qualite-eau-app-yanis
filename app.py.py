@@ -9,6 +9,7 @@ from PIL import Image
 from datetime import datetime
 import matplotlib.pyplot as plt
 import altair as alt
+from tensorflow.keras.models import load_model
 
 # Configuration de la page
 st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", layout="wide")
@@ -375,3 +376,28 @@ Développé avec ❤️ par l'équipe IA & Eau Potable – Algérie 🇩🇿<br>
 © 2025 | Tous droits réservés
 </p>
 """, unsafe_allow_html=True)
+
+# Charger le modèle DNN
+dnn_model = load_model("modele_dnn_ph.h5")
+
+st.header("🧠 Prédiction du pH avec Deep Learning")
+
+# Saisie des 22 autres paramètres
+input_data = []
+parametres_sans_ph = [  # 22 paramètres sauf pH
+    'Total Coliform', 'Escherichia Coli', 'Faecal Streptococci', 'Turbidity', 'Temperature',
+    'Free Chlorine', 'Chlorates', 'Sulfate', 'Magnesium', 'Calcium', 'Conductivity',
+    'Dry Residue', 'Complete Alkaline Title', 'Nitrite', 'Ammonium', 'Phosphate', 'Nitrate',
+    'Iron', 'Manganese', 'Colour', 'Smell', 'Taste'
+]
+
+for param in parametres_sans_ph:
+    val = st.number_input(param, format="%.4f", key=f"dnn_{param}")
+    input_data.append(val)
+
+if st.button("🔍 Prédire le pH (DNN)"):
+    X = np.array(input_data).reshape(1, -1)
+    # Optionnel : appliquer MinMaxScaler ici si tu veux normaliser
+    prediction = dnn_model.predict(X)
+    st.success(f"✅ Le pH prédit est : **{prediction[0][0]:.3f}**")
+
