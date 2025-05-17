@@ -66,8 +66,8 @@ if st.session_state.page_active == "accueil":
     st.markdown("---")
     st.markdown("### 🧑‍🔬 Équipe projet")
     st.markdown("**Équipe IA & Eau Potable – Algérie 🇩🇿**")
-    st.markdown("- Étudiant(e)s : Nom 1, Nom 2")
-    st.markdown("- Encadrant : Prénom NOM")
+    st.markdown("- Étudiant(e)s : FETOUH Yanis, AYAD Lewisa Lysa)
+    st.markdown("- Encadrant : BOUCHRAKI Faiza")
     st.markdown("- Structure : Université / Laboratoire partenaire")
 
     st.stop()  # On bloque le reste tant qu'on est sur l'accueil
