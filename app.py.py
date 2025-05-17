@@ -123,7 +123,7 @@ with col1:
     st.image("eau.jpg", caption="Qualité de l'eau", use_container_width=True)
 
 with col2:
-    st.image("eau1.jpg", caption="Analyse bactériologique", use_container_width=True)
+    st.image("eau1.png", caption="Analyse bactériologique", use_container_width=True)
 
 
 # Titre principal
