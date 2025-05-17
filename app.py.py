@@ -13,7 +13,7 @@ import altair as alt
 # Configuration de la page
 st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", layout="wide")
 # ==========================
-# 🎉 Page d'accueil interactive
+# 🎉 Page d'accueil interactive améliorée
 # ==========================
 
 if "page_active" not in st.session_state:
@@ -27,34 +27,38 @@ if st.session_state.page_active == "accueil":
     with col2:
         st.markdown("### 🌍 Projet IA - Qualité de l’Eau Potable en Algérie")
         st.markdown("Une plateforme intelligente de surveillance, d'analyse et de recommandation.")
-        st.markdown("🧪 Basée sur des modèles d’intelligence artificielle appliqués à des données physico-chimiques et bactériologiques.")
-        st.markdown("---")
-if st.button("🚀 Entrer dans l'application"):
-        st.session_state.page_active = "application"
-    
 
     st.markdown("---")
+    # ✅ BOUTON AU DÉBUT
+    if st.button("🚀 Entrer dans l'application"):
+        st.session_state.page_active = "application"
+        st.experimental_rerun()
+
+    st.markdown("---")
+    st.markdown("### 🧪 À propos du projet")
+    st.markdown("Cette application utilise l’intelligence artificielle pour analyser et surveiller la qualité de l’eau potable en Algérie, selon la norme NA 6361-2016.")
 
     st.markdown("### ⚙️ Fonctionnalités principales :")
-    st.markdown("- 🔍 **Prédiction** d’un paramètre manquant à partir des autres")
-    st.markdown("- 🧪 **Classification** automatique de la qualité de l’eau")
-    st.markdown("- 📋 **Gestion complète** des prélèvements journaliers (saisie, export, filtres)")
-    st.markdown("- 📊 **Visualisation graphique** des données")
-    st.markdown("- 📘 **Conseils et transparence** selon la norme algérienne")
+    st.markdown("- 🔍 **Prédiction** d’un paramètre manquant")
+    st.markdown("- 🧪 **Classification** de la qualité de l’eau")
+    st.markdown("- 📋 **Gestion des prélèvements** (saisie, suivi, export)")
+    st.markdown("- 📊 **Visualisation** interactive")
+    st.markdown("- 📘 **Conseils personnalisés** selon les normes algériennes")
 
-    st.markdown("### 💡 Comment utiliser l’application ?")
-    st.markdown("1. Saisissez ou importez vos données d’analyse")
-    st.markdown("2. Lancez une prédiction ou une classification")
-    st.markdown("3. Consultez les alertes et conseils générés")
-    st.markdown("4. Téléchargez vos rapports sous forme de fichier Excel")
+    st.markdown("### 💡 Mode d’emploi :")
+    st.markdown("1. Saisissez ou importez vos résultats d’analyse")
+    st.markdown("2. Utilisez les outils de prédiction ou classification")
+    st.markdown("3. Téléchargez vos rapports et consultez les recommandations")
 
     st.markdown("---")
-    st.markdown("### 🧑‍🔬 Développé par")
+    st.markdown("### 🧑‍🔬 Équipe projet")
     st.markdown("**Équipe IA & Eau Potable – Algérie 🇩🇿**")
-    st.markdown("- Étudiant(e)s : FETOUH Yanis, AYAD Lewisa Lysa")
-    st.markdown("- Encadrant : BOUCHRAKI Faiza")
-    st.markdown("- Structure : Laboratoire / Université")
-    st.stop()    
+    st.markdown("- Étudiant(e)s : Nom 1, Nom 2")
+    st.markdown("- Encadrant : Prénom NOM")
+    st.markdown("- Structure : Université / Laboratoire partenaire")
+
+    st.stop()
+
 
 
 # Normes algériennes pour certains paramètres
