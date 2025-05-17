@@ -16,8 +16,13 @@ st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", lay
 # 🎉 Page d'accueil interactive améliorée
 # ==========================
 
-if "page_active" not in st.session_state:
-    st.session_state.page_active = "accueil"
+# Bouton de retour à l'accueil (visible après avoir quitté la page d'accueil)
+if "page_active" in st.session_state and st.session_state.page_active != "accueil":
+    with st.sidebar:
+        if st.button("🔙 Retour à l'accueil"):
+            st.session_state.page_active = "accueil"
+            st.experimental_rerun()
+
 
 if st.session_state.page_active == "accueil":
     col1, col2 = st.columns([1, 2])
