@@ -44,7 +44,7 @@ if st.session_state.page_active == "accueil":
     # ✅ BOUTON AU DÉBUT
     if st.button("🚀 Entrer dans l'application"):
         st.session_state.page_active = "application"
-        st.experimental_rerun()
+        st.stop()
 
     # Présentation (après le bouton)
     st.markdown("---")
