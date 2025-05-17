@@ -31,7 +31,7 @@ if st.session_state.page_active == "accueil":
         st.markdown("---")
 if st.button("🚀 Entrer dans l'application"):
         st.session_state.page_active = "application"
-    st.stop()    
+    
 
     st.markdown("---")
 
@@ -54,6 +54,7 @@ if st.button("🚀 Entrer dans l'application"):
     st.markdown("- Étudiant(e)s : FETOUH Yanis, AYAD Lewisa Lysa")
     st.markdown("- Encadrant : BOUCHRAKI Faiza")
     st.markdown("- Structure : Laboratoire / Université")
+    st.stop()    
 
 
 # Normes algériennes pour certains paramètres
