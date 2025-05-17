@@ -118,7 +118,7 @@ def to_excel(df_to_export):
 
 # Image
 if os.path.exists("eau.jpg"):
-    st.image("eau.jpg", use_column_width=True, caption="Analyse de la qualité de l'eau")
+    st.image("eau.jpg", use_container_width=True, caption="Analyse de la qualité de l'eau")
 
 # Titre principal
 st.markdown("<h1 style='text-align: center; color: teal;'>💧 Application d'analyse de la qualité de l'eau potable</h1>", unsafe_allow_html=True)
