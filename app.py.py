@@ -13,17 +13,23 @@ import altair as alt
 # Configuration de la page
 st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", layout="wide")
 # ==========================
-# 🎉 Page d'accueil interactive améliorée
+# 🧭 Navigation : Entrée & Sortie de l'application
 # ==========================
 
-# Bouton de retour à l'accueil (visible après avoir quitté la page d'accueil)
-if "page_active" in st.session_state and st.session_state.page_active != "accueil":
+# Initialisation de la session pour la navigation
+if "page_active" not in st.session_state:
+    st.session_state.page_active = "accueil"
+
+# Bouton de retour dans la barre latérale (visible après entrée)
+if st.session_state.page_active != "accueil":
     with st.sidebar:
         if st.button("🔙 Retour à l'accueil"):
             st.session_state.page_active = "accueil"
             st.experimental_rerun()
 
-
+# ==========================
+# 🎉 PAGE D'ACCUEIL INTERACTIVE
+# ==========================
 if st.session_state.page_active == "accueil":
     col1, col2 = st.columns([1, 2])
     with col1:
@@ -32,6 +38,7 @@ if st.session_state.page_active == "accueil":
     with col2:
         st.markdown("### 🌍 Projet IA - Qualité de l’Eau Potable en Algérie")
         st.markdown("Une plateforme intelligente de surveillance, d'analyse et de recommandation.")
+        st.markdown("🧪 Basée sur des modèles d’intelligence artificielle appliqués à des données physico-chimiques et bactériologiques.")
 
     st.markdown("---")
     # ✅ BOUTON AU DÉBUT
@@ -39,6 +46,7 @@ if st.session_state.page_active == "accueil":
         st.session_state.page_active = "application"
         st.experimental_rerun()
 
+    # Présentation (après le bouton)
     st.markdown("---")
     st.markdown("### 🧪 À propos du projet")
     st.markdown("Cette application utilise l’intelligence artificielle pour analyser et surveiller la qualité de l’eau potable en Algérie, selon la norme NA 6361-2016.")
@@ -62,7 +70,7 @@ if st.session_state.page_active == "accueil":
     st.markdown("- Encadrant : Prénom NOM")
     st.markdown("- Structure : Université / Laboratoire partenaire")
 
-    st.stop()
+    st.stop()  # On bloque le reste tant qu'on est sur l'accueil
 
 
 
