@@ -9,9 +9,31 @@ from PIL import Image
 from datetime import datetime
 import matplotlib.pyplot as plt
 import altair as alt
+import base64
 
 # Configuration de la page
 st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", layout="wide")
+
+def add_background(image_file):
+    with open(image_file, "rb") as img:
+        encoded = base64.b64encode(img.read()).decode()
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/jpg;base64,{encoded}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+# Appel de la fonction pour activer le fond
+add_background("fond.jpg")
+
 # ==========================
 # 🧭 Navigation : Entrée & Sortie de l'application
 # ==========================
