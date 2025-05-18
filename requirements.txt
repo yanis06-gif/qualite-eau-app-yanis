@@ -1,12 +1,9 @@
 streamlit
 pandas
 numpy
-scikit-learn
-tensorflow
-matplotlib
-openpyxl
 joblib
-xlsxwriter
-pip install openai
-openai==1.13.3
-
+matplotlib
+altair
+tensorflow
+fpdf
+openai
