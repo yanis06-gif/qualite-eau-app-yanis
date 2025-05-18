@@ -534,7 +534,7 @@ with st.expander("💬 Ouvrir le chatbot d’aide", expanded=True):
                     st.session_state.messages.append({"role": "assistant", "content": reply})
                 except Exception as e:
                     st.error(f"Erreur lors de la requête OpenAI : {e}")
-
+coucou
 
 
 
