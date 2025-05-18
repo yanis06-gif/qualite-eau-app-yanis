@@ -7,4 +7,6 @@ matplotlib
 openpyxl
 joblib
 xlsxwriter
+pip install openai
+openai==1.13.3
 

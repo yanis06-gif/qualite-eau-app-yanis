@@ -11,12 +11,15 @@ from PIL import Image
 from datetime import datetime
 import matplotlib.pyplot as plt
 import altair as alt
+from fpdf import FPDF
 from tensorflow.keras.models import load_model
 
 # Configuration de la page
 st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", layout="wide")
 
-# Initialisation de la navigation
+# ===========================
+# 🔄 Navigation page accueil
+# ===========================
 if "page_active" not in st.session_state:
     st.session_state.page_active = "accueil"
 
@@ -26,7 +29,9 @@ if st.session_state.page_active != "accueil":
             st.session_state.page_active = "accueil"
             st.stop()
 
-# Page d’accueil
+# ===========================
+# 🌍 Page d’accueil
+# ===========================
 if st.session_state.page_active == "accueil":
     col1, col2 = st.columns([1, 2])
     with col1:
@@ -42,7 +47,9 @@ if st.session_state.page_active == "accueil":
     st.markdown("---")
     st.stop()
 
-# 🔧 Normes algériennes des 23 paramètres et conseils
+# ===========================
+# 📏 Normes algériennes
+# ===========================
 normes = {
     "Total Coliform": {"max": 0, "conseil": "Désinfecter le réseau et contrôler la source d’eau."},
     "Escherichia Coli": {"max": 0, "conseil": "Procéder à une chloration et vérifier les sources fécales."},
@@ -69,10 +76,12 @@ normes = {
     "Taste": {"max": 0, "conseil": "Analyser les composés désinfectants ou organiques."}
 }
 
-# Liste des paramètres (extraite automatiquement des normes)
+# Liste des 23 paramètres
 parametres = list(normes.keys())
 
-# 🧠 Fonction de vérification des normes
+# ===========================
+# ⚠️ Vérification des normes
+# ===========================
 def verifier_parametres_entres(valeurs: dict):
     alertes = []
     for param, valeur in valeurs.items():
@@ -85,7 +94,9 @@ def verifier_parametres_entres(valeurs: dict):
                 alertes.append(f"⚠️ **{param} = {valeur:.2f}** est hors norme ({min_val} - {max_val}). 💡 {conseil}")
     return alertes
 
-# 🧾 Fonction d’export Excel
+# ===========================
+# 📤 Fonction export Excel
+# ===========================
 def to_excel(df_to_export):
     try:
         output = io.BytesIO()
@@ -187,31 +198,39 @@ for param in parametres:
 # Format d’entrée
 X = np.array([valeurs[p] for p in valeurs]).reshape(1, -1)
 
-# Bloc RF
+# === Modèle Random Forest ===
 model_rf_filename = f"modele_{parametre_cible.replace(' ', '_')}.pkl"
 if os.path.exists(model_rf_filename):
     model_rf = joblib.load(model_rf_filename)
-    if st.button(f"📈 Prédire avec Random Forest", key="btn_rf"):
-        pred_rf = model_rf.predict(X)[0]
-        st.success(f"📊 Prédiction avec Random Forest : **{pred_rf:.4f}**")
-        for a in verifier_parametres_entres({parametre_cible: pred_rf}):
-            st.warning(a)
+    if st.button("📈 Prédire avec Random Forest", key="btn_rf"):
+        try:
+            pred_rf = model_rf.predict(X)[0]
+            st.success(f"📊 Prédiction RF pour **{parametre_cible}** : `{pred_rf:.4f}`")
+            for a in verifier_parametres_entres({parametre_cible: pred_rf}):
+                st.warning(a)
+        except Exception as e:
+            st.error(f"Erreur Random Forest : {e}")
 
-# Bloc DNN
+# === Modèle Deep Learning ===
 model_dnn_filename = f"modele_dnn_{parametre_cible.replace(' ', '_')}.h5"
 if os.path.exists(model_dnn_filename):
-    model_dnn = load_model(model_dnn_filename)
-    if st.button(f"🤖 Prédire avec Deep Learning", key="btn_dnn"):
-        pred_dnn = model_dnn.predict(X)[0][0]
-        st.success(f"🤖 Prédiction avec Deep Learning : **{pred_dnn:.4f}**")
-        for a in verifier_parametres_entres({parametre_cible: pred_dnn}):
-            st.warning(a)
+    try:
+        model_dnn = load_model(model_dnn_filename)
+        if st.button("🤖 Prédire avec Deep Learning", key="btn_dnn"):
+            pred_dnn = model_dnn.predict(X)[0][0]
+            st.success(f"🤖 Prédiction DNN pour **{parametre_cible}** : `{pred_dnn:.4f}`")
+            for a in verifier_parametres_entres({parametre_cible: pred_dnn}):
+                st.warning(a)
+    except Exception as e:
+        st.error(f"Erreur Deep Learning : {e}")
+else:
+    st.info("Aucun modèle trouvé pour ce paramètre.")
 # ================================
-# 🧪 CLASSIFICATION DE LA QUALITÉ DE L’EAU
+# 🧪 CLASSIFICATION DE LA QUALITÉ DE L'EAU (RF + DNN)
 # ================================
-st.header("🧪 Classification de la qualité de l’eau")
+st.header("🧪 Classification de la qualité de l'eau")
 
-# Encodage des classes (doit être identique à l’entraînement)
+# Encodage des classes (doit correspondre à l'entraînement)
 classes = {
     0: "Bonne",
     1: "Mauvaise",
@@ -232,8 +251,8 @@ if os.path.exists("modele_Classification.pkl"):
     model_class_rf = joblib.load("modele_Classification.pkl")
     if st.button("📈 Classifier avec Random Forest", key="btn_class_rf"):
         y_pred_rf = model_class_rf.predict(X_input)[0]
-        classe = classes.get(y_pred_rf, "Inconnue")
-        st.success(f"✅ Classe prédite (RF) : **{classe}**")
+        classe_rf = classes.get(y_pred_rf, "Inconnue")
+        st.success(f"✅ Classe prédite (RF) : **{classe_rf}**")
         for a in verifier_parametres_entres(valeurs_class):
             st.warning(a)
 
@@ -243,8 +262,8 @@ if os.path.exists("modele_classification_dnn.h5"):
     if st.button("🤖 Classifier avec Deep Learning", key="btn_class_dnn"):
         y_pred_dl = model_class_dnn.predict(X_input)
         classe_dl = np.argmax(y_pred_dl, axis=1)[0]
-        label = classes.get(classe_dl, "Inconnue")
-        st.success(f"🤖 Classe prédite (DNN) : **{label}**")
+        label_dl = classes.get(classe_dl, "Inconnue")
+        st.success(f"🤖 Classe prédite (DNN) : **{label_dl}**")
         for a in verifier_parametres_entres(valeurs_class):
             st.warning(a)
 
@@ -253,15 +272,59 @@ with st.expander("📘 Voir les correspondances des classes encodées"):
     for code, label in classes.items():
         st.write(f"**{code}** → {label}")
 # ================================
-# 📊 VISUALISATION & 📤 EXPORT
+# 🧪 DÉTECTION DU TYPE DE POLLUTION
 # ================================
+st.header("☣️ Détection du type de pollution")
+
+def detecter_pollution_detaillee(data: dict):
+    types = []
+    details = []
+
+    if data["Escherichia Coli"] > 0 or data["Total Coliform"] > 0 or data["Faecal Streptococci"] > 0:
+        types.append("Biologique")
+        details.append("Présence de bactéries indicatrices de contamination fécale.")
+
+    if data["Nitrate"] > 50 or data["Chlorates"] > 0.7 or data["Phosphate"] > 5 or data["Nitrite"] > 0.5:
+        types.append("Chimique")
+        details.append("Concentrations élevées en nitrates, chlorates, phosphates ou nitrites.")
+
+    if data["Ammonium"] > 0.5 or data["Turbidity"] > 5 or data["Complete Alkaline Title"] < 100:
+        types.append("Organique")
+        details.append("Indications de décomposition organique ou faible pouvoir tampon.")
+
+    if data["Iron"] > 0.3 or data["Manganese"] > 0.1 or data["Calcium"] > 200 or data["Magnesium"] > 50:
+        types.append("Métallique")
+        details.append("Excès de métaux ou minéraux dans l’eau.")
+
+    if data["pH"] < 6.5 or data["pH"] > 8.5 or data["Temperature"] > 25 or data["Conductivity"] > 2800:
+        types.append("Physico-chimique")
+        details.append("Paramètres physico-chimiques en dehors des normes.")
+
+    if len(types) == 0:
+        return "✅ Aucune pollution détectée", []
+    elif len(types) == 1:
+        return f"☣️ Pollution de type **{types[0]}**", details
+    else:
+        return f"☣️ Pollution multiple détectée : {', '.join(types)}", details
+
+# Utilisation des valeurs déjà saisies pour la classification
+pollution_label, pollution_details = detecter_pollution_detaillee(valeurs_class)
+
+st.info(pollution_label)
+if pollution_details:
+    with st.expander("📋 Détails de la pollution détectée"):
+        for d in pollution_details:
+            st.markdown(f"- {d}")
+st.session_state["last_class_input"] = 
+
+# Visualisation des prélèvements #
+
 st.header("📊 Visualisation des prélèvements")
 
 df = st.session_state.df_prelèvements.copy()
 
 if not df.empty:
-    st.markdown("### 📈 Choisissez un paramètre à visualiser")
-
+    st.markdown("### 📈 Sélectionner un paramètre à visualiser")
     param_to_plot = st.selectbox("Paramètre :", parametres)
     group_by = st.radio("Comparer selon :", ["Date", "Entreprise", "Préleveur"])
 
@@ -290,34 +353,18 @@ if not df.empty:
     except Exception as e:
         st.warning(f"Erreur de graphique : {e}")
 else:
-    st.info("Aucun prélèvement à visualiser.")
-
-# ================================
-# 📤 EXPORT DES DONNÉES
-# ================================
-st.header("📤 Exporter les données")
+    st.info("Aucune donnée disponible à visualiser.")
+# Export des données
+st.header("📤 Export des données enregistrées")
 
 if not df.empty:
+    # 📁 Export Excel
+    excel_data = to_excel(df)
+    st.download_button("📥 Télécharger en Excel", data=excel_data,
+                       file_name="prelevements_eau.xlsx",
+                       mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-    # Export Excel
-    def to_excel(dataframe):
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            dataframe.to_excel(writer, sheet_name='Prelevements', index=False)
-        output.seek(0)
-        return output.read()
-
-    excel_file = to_excel(df)
-
-    st.download_button(
-        label="📥 Télécharger en Excel",
-        data=excel_file,
-        file_name="prelevements_eau.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        key="download_excel"
-    )
-
-    # Export PDF
+    # 📄 Export PDF
     from fpdf import FPDF
 
     def to_pdf(dataframe):
@@ -340,7 +387,7 @@ if not df.empty:
                 val = str(row[col])[:15]
                 pdf.cell(col_width, 8, val, border=1)
             pdf.ln()
-            if i == 20:  # Limiter à 20 lignes pour éviter surcharge
+            if i == 20:  # Limiter à 20 lignes
                 pdf.cell(200, 10, "… (données tronquées)", ln=True, align='C')
                 break
 
@@ -350,16 +397,145 @@ if not df.empty:
 
     try:
         pdf_data = to_pdf(df)
-        st.download_button(
-            label="📄 Télécharger en PDF",
-            data=pdf_data,
-            file_name="rapport_prelevements.pdf",
-            mime="application/pdf",
-            key="download_pdf"
-        )
+        st.download_button("📄 Télécharger en PDF", data=pdf_data,
+                           file_name="rapport_prelevements.pdf",
+                           mime="application/pdf")
     except Exception as e:
         st.warning(f"Erreur PDF : {e}")
 else:
     st.info("Aucune donnée à exporter.")
+
+# Traitement d'un fichier excel
+st.header("📂 Traitement d’un fichier Excel")
+
+uploaded_file = st.file_uploader("Téléverser un fichier contenant les données d’analyse", type=["xlsx", "csv"])
+
+if uploaded_file:
+    try:
+        if uploaded_file.name.endswith(".csv"):
+            df_uploaded = pd.read_csv(uploaded_file)
+        else:
+            df_uploaded = pd.read_excel(uploaded_file)
+
+        st.success("✅ Fichier chargé avec succès.")
+        st.dataframe(df_uploaded.head())
+
+        action = st.selectbox("Choisir une action :", ["Classification", "Prédiction d’un paramètre", "Type de pollution"])
+
+        if action == "Classification":
+            model_class = joblib.load("modele_Classification.pkl")
+            X = df_uploaded[parametres]
+            y_pred = model_class.predict(X)
+            classes = {3: "Très bonne", 0: "Bonne", 2: "Moyenne", 1: "Mauvaise", 4: "Très mauvaise"}
+            df_uploaded["Classe Prédite"] = [classes.get(i, "Inconnue") for i in y_pred]
+            st.dataframe(df_uploaded)
+
+        elif action == "Prédiction d’un paramètre":
+            param_to_predict = st.selectbox("Quel paramètre manque-t-il ?", parametres)
+            input_cols = [p for p in parametres if p != param_to_predict]
+            model_file = f"modele_{param_to_predict.replace(' ', '_')}.pkl"
+            if os.path.exists(model_file):
+                model_pred = joblib.load(model_file)
+                X = df_uploaded[input_cols]
+                pred = model_pred.predict(X)
+                df_uploaded[f"{param_to_predict} Prédit"] = pred
+                st.dataframe(df_uploaded)
+            else:
+                st.warning("Modèle non trouvé pour ce paramètre.")
+
+        elif action == "Type de pollution":
+            def detect_pollution(row):
+                types = []
+                if row["Escherichia Coli"] > 0 or row["Total Coliform"] > 0:
+                    types.append("biologique")
+                if row["Nitrate"] > 50 or row["Chlorates"] > 0.7:
+                    types.append("chimique")
+                if row["Ammonium"] > 0.5 or row["Turbidity"] > 5:
+                    types.append("organique")
+                if row["Iron"] > 0.3 or row["Manganese"] > 0.1:
+                    types.append("métallique")
+                if not types:
+                    return "aucune"
+                elif len(types) == 1:
+                    return types[0]
+                else:
+                    return "multiple"
+
+            df_uploaded["Type de Pollution"] = df_uploaded.apply(detect_pollution, axis=1)
+            st.dataframe(df_uploaded)
+
+        st.download_button("📥 Télécharger les résultats", to_excel(df_uploaded),
+                           file_name="resultats_predictions.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+    except Exception as e:
+        st.error(f"Erreur de traitement : {e}")
+# ==================================
+# 🤖 Assistance IA (Chatbot local)
+# ==================================
+st.markdown("### 🤖 Assistance intelligente (Chatbot local)")
+st.info("Posez une question ou décrivez un problème. L’assistant vous guidera !")
+
+# Base de connaissances simple
+faq_reponses = {
+    "ajouter prélèvement": "Pour ajouter un prélèvement, allez dans 'Base de données', puis remplissez les champs et cliquez sur 'Enregistrer'.",
+    "supprimer paramètre": "Dans la section 'Base de données', utilisez le bouton ❌ pour retirer un paramètre personnalisé.",
+    "prédiction": "Rendez-vous dans la section 'Prédiction', choisissez un paramètre et cliquez sur 'Prédire avec Random Forest' ou 'Deep Learning'.",
+    "classification": "Dans la section 'Classification', saisissez les valeurs des paramètres, puis cliquez sur 'Classifier'.",
+    "export": "Allez dans la section 'Export' pour télécharger les résultats en Excel ou PDF.",
+    "fichier excel": "Téléversez un fichier Excel ou CSV contenant vos résultats, et sélectionnez l'action souhaitée.",
+    "erreur": "Veuillez vérifier que tous les champs requis sont remplis, ou que le modèle demandé est bien présent dans le dossier."
+}
+
+# Interface utilisateur
+user_question = st.text_input("❓ Votre question ou problème :", key="chat_input")
+if st.button("🧠 Obtenir de l’aide", key="btn_chatbot"):
+    reponse = "🤖 Je n’ai pas compris votre question. Essayez d’utiliser des mots-clés comme 'prédiction', 'ajouter prélèvement', 'fichier excel'..."
+    for mot_cle, texte in faq_reponses.items():
+        if mot_cle in user_question.lower():
+            reponse = texte
+            break
+    st.success(reponse)
+# ========== 🤖 Assistance IA - Chatbot OpenAI ==========
+import openai
+from dotenv import load_dotenv
+
+# Charger la clé API depuis .env
+load_dotenv()
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+st.markdown("## 🤖 Assistance intelligente - Chatbot IA")
+
+with st.expander("💬 Ouvrir le chatbot d’aide", expanded=True):
+    if "messages" not in st.session_state:
+        st.session_state.messages = [
+            {"role": "system", "content": "Tu es un assistant expert en analyse de la qualité de l’eau, en normes algériennes, et en IA appliquée à l’eau. Donne des réponses claires, professionnelles, et utiles."}
+        ]
+
+    for msg in st.session_state.messages[1:]:  # on saute le système
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+
+    prompt = st.chat_input("Pose ta question ici...")
+
+    if prompt:
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        with st.chat_message("assistant"):
+            with st.spinner("Réflexion en cours..."):
+                try:
+                    response = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=st.session_state.messages
+                    )
+                    reply = response.choices[0].message["content"]
+                    st.markdown(reply)
+                    st.session_state.messages.append({"role": "assistant", "content": reply})
+                except Exception as e:
+                    st.error(f"Erreur lors de la requête OpenAI : {e}")
+
+
+
 
 
