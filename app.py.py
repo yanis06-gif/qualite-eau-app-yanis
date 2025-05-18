@@ -252,6 +252,8 @@ if os.path.exists("modele_Classification.pkl"):
     if st.button("📈 Classifier avec Random Forest", key="btn_class_rf"):
         y_pred_rf = model_class_rf.predict(X_input)[0]
         classe_rf = classes.get(y_pred_rf, "Inconnue")
+        st.session_state["last_class_input"] = valeurs_class
+
         st.success(f"✅ Classe prédite (RF) : **{classe_rf}**")
         for a in verifier_parametres_entres(valeurs_class):
             st.warning(a)
@@ -315,7 +317,6 @@ if pollution_details:
     with st.expander("📋 Détails de la pollution détectée"):
         for d in pollution_details:
             st.markdown(f"- {d}")
-st.session_state["last_class_input"] = 
 
 # Visualisation des prélèvements #
 
@@ -534,7 +535,7 @@ with st.expander("💬 Ouvrir le chatbot d’aide", expanded=True):
                     st.session_state.messages.append({"role": "assistant", "content": reply})
                 except Exception as e:
                     st.error(f"Erreur lors de la requête OpenAI : {e}")
-coucou
+
 
 
 
