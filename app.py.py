@@ -259,7 +259,7 @@ if os.path.exists("modele_Classification.pkl"):
             st.warning(a)
 
 # === Modèle Deep Learning
-if os.path.exists("modele_classification_dnn.h5"):
+if os.path.exists("modele_dnn_classification.h5"):
     model_class_dnn = load_model("modele_classification_dnn.h5")
     if st.button("🤖 Classifier avec Deep Learning", key="btn_class_dnn"):
         y_pred_dl = model_class_dnn.predict(X_input)
