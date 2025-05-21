@@ -1,55 +1,410 @@
-# ==========================================
-# 💧 APPLICATION QUALITÉ DE L'EAU - STREAMLIT
-# ==========================================
+# app.py - Point d'entrée principal de l'application
+
 import streamlit as st
-import numpy as np
 import pandas as pd
+import numpy as np
 import joblib
 import os
-import io
-from PIL import Image
 from datetime import datetime
+from PIL import Image
 import matplotlib.pyplot as plt
 import altair as alt
-from fpdf import FPDF
 from tensorflow.keras.models import load_model
 
-# Configuration de la page
-st.set_page_config(page_title="Qualité de l'eau potable", page_icon="💧", layout="wide")
+# Configuration globale
+st.set_page_config(
+    page_title="Qualité de l'eau - Algérie 🇩🇿",
+    layout="wide",
+    page_icon="💧"
+)
+st.markdown("""
+<style>
+/* ✅ Arrière-plan élégant */
+body {
+    background-color: #f9f9fb;
+}
 
-# ===========================
-# 🔄 Navigation page accueil
-# ===========================
+/* ✅ Titres */
+h1, h2, h3, h4 {
+    color: #003566;
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: 700;
+}
+
+/* ✅ Texte */
+html, body, [class*="css"]  {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 15px;
+    color: #333;
+}
+
+/* ✅ Boutons principaux */
+.stButton > button {
+    background-color: #0077b6;
+    color: white;
+    border: none;
+    padding: 0.5em 1.3em;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+.stButton > button:hover {
+    background-color: #005f8a;
+}
+
+/* ✅ Boutons de téléchargement */
+.stDownloadButton > button {
+    background-color: #00b4d8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+.stDownloadButton > button:hover {
+    background-color: #0096c7;
+}
+
+/* ✅ Input text & number */
+input[type="text"], input[type="number"] {
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    padding: 0.4em 0.7em;
+}
+
+/* ✅ Select, radio, file uploader */
+.stSelectbox, .stRadio, .stFileUploader {
+    background-color: #f0f4f8;
+    border-radius: 8px;
+    padding: 1em;
+}
+
+/* ✅ Cards et contenants */
+[data-testid="stExpander"] {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0px 2px 10px rgba(0,0,0,0.04);
+    padding: 10px;
+}
+
+/* ✅ Expander header */
+[data-testid="stExpander"] summary {
+    font-weight: bold;
+    color: #023e8a;
+}
+
+/* ✅ Colonnes */
+.stColumn {
+    padding: 0.5rem;
+}
+
+/* ✅ Barre latérale */
+[data-testid="stSidebar"] {
+    background-color: #edf6f9;
+}
+
+/* ✅ Tableau */
+thead th {
+    background-color: #0077b6;
+    color: white;
+}
+
+/* ✅ Graphiques */
+.vega-embed {
+    background-color: #ffffff !important;
+    border-radius: 10px;
+    padding: 10px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+# Initialisation de la session
+if "page" not in st.session_state:
+    st.session_state.page = "accueil"
+
+# Barre latérale de navigation
+with st.sidebar:
+    st.image("logo.png", width=150)
+    st.title("🌐 Navigation")
+    page = st.radio("Aller vers :", [
+        "Accueil",
+        "Base de données",
+        "Classification",
+        "Prédiction Paramètre",
+        "Prédiction Fichier",
+        "Visualisation",
+        "Export",
+        "Chatbot IA",
+        "Éthique & À propos"
+    ])
+    st.session_state.page = page
+
+# Affichage des pages
+if st.session_state.page == "Accueil":
+    import pages.accueil as accueil
+    accueil.show()
+
+elif st.session_state.page == "Base de données":
+    import pages.base_donnees as base
+    base.show()
+
+elif st.session_state.page == "Classification":
+    import pages.classification as clf
+    clf.show()
+
+elif st.session_state.page == "Prédiction Paramètre":
+    import pages.prediction_param as pred
+    pred.show()
+
+elif st.session_state.page == "Prédiction Fichier":
+    import pages.prediction_fichier as pf
+    pf.show()
+
+elif st.session_state.page == "Visualisation":
+    import pages.visualisation as vis
+    vis.show()
+
+elif st.session_state.page == "Export":
+    import pages.export as ex
+    ex.show()
+
+elif st.session_state.page == "Chatbot IA":
+    import pages.chatbot as bot
+    bot.show()
+
+elif st.session_state.page == "Éthique & À propos":
+    import pages.ethique as eth
+    eth.show()
+
+# Configuration de la page d'accueil
+st.set_page_config(page_title="Accueil - Qualité de l'eau", layout="centered", page_icon="💧")
+
+# Design en colonnes
+col1, col2 = st.columns([1, 3])
+with col1:
+    if os.path.exists("logo.png"):
+        st.image("logo.png", width=130)
+
+with col2:
+    st.markdown("""
+        <h1 style='color:#0a9396;'>💧 Analyse intelligente de la qualité de l’eau potable</h1>
+        <p style='font-size:18px;'>Un système intelligent pour la surveillance, la prédiction et la classification de la qualité de l’eau selon les normes algériennes (NA 6361-2016).</p>
+    """, unsafe_allow_html=True)
+
+st.markdown("---")
+
+# Images d'illustration
+img1, img2 = st.columns(2)
+with img1:
+    if os.path.exists("eau.jpg"):
+        st.image("eau.jpg", caption="Analyse physico-chimique", use_container_width=True)
+with img2:
+    if os.path.exists("eau1.png"):
+        st.image("eau1.png", caption="Analyse bactériologique", use_container_width=True)
+
+st.markdown("---")
+
+# Bouton pour accéder à l'app
+if st.button("🚀 Accéder à l’application", use_container_width=True):
+    st.switch_page("app.py")
+
+# Équipe projet
+st.markdown("""
+### 👥 Équipe projet
+- 🎓 Étudiants : **FETOUH Yanis**, **AYAD Lewisa Lysa**
+- 👩‍🏫 Encadrante : **BOUCHRAKI Faiza**
+- 🏛️ Université / Laboratoire partenaire : **[à personnaliser]**
+
+### 💼 Fonctionnalités disponibles :
+- 🔍 Prédiction d’un paramètre manquant
+- 🧪 Classification IA de la qualité de l’eau
+- 📂 Import/Export Excel & PDF
+- 📊 Visualisation dynamique des analyses
+- 🤖 Assistant IA intégré (chatbot)
+- 📘 Recommandations selon les normes algériennes
+
+---
+<p style='text-align:center;'>Développée avec ❤️ par l'équipe IA & Eau Potable – Algérie 🇩🇿</p>
+""", unsafe_allow_html=True)
+# ======================================
+# 💧 QUALITÉ DE L'EAU POTABLE - APP.PY
+# Partie 2 : Application principale avec menu
+# ======================================
+
+# ============ PAGE CONFIGURATION ============
+st.set_page_config(
+    page_title="Qualité de l'eau potable",
+    page_icon="💧",
+    layout="wide"
+)
+
+# ============ CHARGEMENT DES DONNÉES ============
 if "page_active" not in st.session_state:
     st.session_state.page_active = "accueil"
 
-if st.session_state.page_active != "accueil":
-    with st.sidebar:
-        if st.button("🔙 Retour à l'accueil"):
-            st.session_state.page_active = "accueil"
-            st.stop()
+# ============ MENU LATÉRAL DE NAVIGATION ============
+menu = st.sidebar.radio("Navigation", [
+    "🏠 Accueil",
+    "📋 Base de données",
+    "🔍 Prédiction paramètre",
+    "🧪 Classification",
+    "☣️ Type de pollution",
+    "📊 Visualisation",
+    "📤 Export",
+    "💬 Assistant IA",
+])
 
-# ===========================
-# 🌍 Page d’accueil
-# ===========================
-if st.session_state.page_active == "accueil":
+# ============ REDIRECTION PAGE ============
+st.session_state.page_active = menu
+
+# ========= IMPORT DES MODULES ==========
+# Les prochains blocs s'ajouteront ici dans la suite du code (base de données, prediction, classification, etc.)
+
+# Titre en haut permanent
+st.markdown("""
+    <style>
+        .title {
+            font-size: 40px;
+            font-weight: 700;
+            color: #0a9396;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+    </style>
+    <div class="title">💧 Application d'analyse intelligente de la qualité de l'eau</div>
+""", unsafe_allow_html=True)
+
+# ============ AFFICHAGE ACCUEIL ============
+if st.session_state.page_active == "🏠 Accueil":
     col1, col2 = st.columns([1, 2])
     with col1:
         if os.path.exists("logo.png"):
-            st.image("logo.png", width=150)
+            st.image("logo.png", width=180)
     with col2:
-        st.markdown("### 🌍 Projet IA - Qualité de l’Eau Potable en Algérie")
-        st.markdown("🧪 Analyse et prédiction avec intelligence artificielle")
-    st.markdown("---")
-    if st.button("🚀 Entrer dans l'application"):
-        st.session_state.page_active = "application"
-        st.stop()
-    st.markdown("---")
-    st.stop()
+        st.markdown("### 🌍 Projet IA - Surveillance de l'eau potable en Algérie")
+        st.markdown("Cette plateforme permet de surveiller, analyser et prédire la qualité de l'eau selon la norme NA 6361-2016.")
+        st.markdown("""
+        **Fonctionnalités incluses :**
+        - Prédiction par Random Forest & Deep Learning
+        - Classification de la qualité (5 classes)
+        - Détection automatique du type de pollution
+        - Interface professionnelle d'analyse et export
+        - Assistant IA pour aider les utilisateurs
+        """)
+        st.markdown("**👩‍💻 Équipe :** FETOUH Yanis, AYAD Lewisa Lysa | Université algérienne 🇩🇿")
 
-# ===========================
-# 📏 Normes algériennes
-# ===========================
+    st.markdown("---")
+    st.success("Utilise le menu à gauche pour commencer ✅")
+
+# Prochaine étape : Base de données (si tu veux que je continue, dis-le et je l'intègre maintenant)
+
+# ==============================
+# ⚙️ Configuration de la page
+# ==============================
+st.set_page_config(page_title="Qualité de l'eau - Algérie", page_icon="💧", layout="wide")
+
+st.markdown("""
+    <style>
+    .main-title {text-align: center; font-size: 36px; color: #0a9396; font-weight: bold;}
+    .sub-title {text-align: center; font-size: 20px; color: #005f73;}
+    .bloc-section {border: 1px solid #ccc; padding: 20px; border-radius: 10px; background-color: #f5f5f5;}
+    </style>
+""", unsafe_allow_html=True)
+
+# ==============================
+# 📋 GESTION DES PRÉLÈVEMENTS
+# ==============================
+st.markdown("<h1 class='main-title'>📋 Base de Données des Prélèvements</h1>", unsafe_allow_html=True)
+
+# Initialisation
+if "df_prelèvements" not in st.session_state:
+    try:
+        st.session_state.df_prelèvements = pd.read_pickle("prelevements_sauvegarde.pkl")
+    except:
+        st.session_state.df_prelèvements = pd.DataFrame()
+
+if "parametres_dynamiques" not in st.session_state:
+    st.session_state.parametres_dynamiques = []
+
+parametres_principaux = [
+    'Total Coliform', 'Escherichia Coli', 'Faecal Streptococci', 'Turbidity', 'pH', 'Temperature',
+    'Free Chlorine', 'Chlorates', 'Sulfate', 'Magnesium', 'Calcium', 'Conductivity', 'Dry Residue',
+    'Complete Alkaline Title', 'Nitrite', 'Ammonium', 'Phosphate', 'Nitrate', 'Iron', 'Manganese',
+    'Colour', 'Smell', 'Taste'
+]
+
+if "parametres_actifs" not in st.session_state:
+    st.session_state.parametres_actifs = parametres_principaux.copy()
+
+# Modification des paramètres disponibles
+st.markdown("### ⚙️ Gérer les Paramètres Mesurés")
+col1, col2 = st.columns(2)
+with col1:
+    param_to_remove = st.selectbox("🔻 Supprimer un paramètre", st.session_state.parametres_actifs)
+    if st.button("❌ Supprimer"):
+        if param_to_remove in st.session_state.parametres_actifs:
+            st.session_state.parametres_actifs.remove(param_to_remove)
+            st.success(f"✅ '{param_to_remove}' supprimé des paramètres mesurés.")
+
+with col2:
+    param_to_add = st.text_input("➕ Ajouter un nouveau paramètre")
+    if st.button("✅ Ajouter"):
+        if param_to_add and param_to_add not in st.session_state.parametres_actifs:
+            st.session_state.parametres_actifs.append(param_to_add.strip())
+            st.success(f"✅ '{param_to_add}' ajouté aux paramètres mesurés.")
+
+# Formulaire de saisie de prélèvement
+st.markdown("### 🧾 Saisir un nouveau prélèvement")
+with st.form("form_prelevement"):
+    col1, col2 = st.columns(2)
+    with col1:
+        date = st.date_input("Date", value=datetime.today())
+        heure = st.time_input("Heure")
+        entreprise = st.text_input("Entreprise")
+        code = st.text_input("Code")
+    with col2:
+        preleveur = st.text_input("Préleveur")
+        localisation = st.text_input("Localisation")
+        analyste = st.text_input("Analyste")
+
+    st.markdown("### 🔬 Résultats des paramètres")
+    resultats = {}
+    for param in st.session_state.parametres_actifs:
+        resultats[param] = st.number_input(param, value=0.0, format="%.4f", key=f"val_{param}")
+
+    submitted = st.form_submit_button("💾 Enregistrer le prélèvement")
+    if submitted:
+        new_data = {
+            "Date": date,
+            "Heure": heure,
+            "Entreprise": entreprise,
+            "Code": code,
+            "Préleveur": preleveur,
+            "Localisation": localisation,
+            "Analyste": analyste,
+        }
+        new_data.update(resultats)
+        st.session_state.df_prelèvements = pd.concat([
+            st.session_state.df_prelèvements,
+            pd.DataFrame([new_data])
+        ], ignore_index=True)
+        st.session_state.df_prelèvements.to_pickle("prelevements_sauvegarde.pkl")
+        st.success("✅ Prélèvement enregistré avec succès.")
+
+# Affichage du tableau
+st.markdown("### 📊 Tableau des Prélèvements")
+if not st.session_state.df_prelèvements.empty:
+    st.dataframe(st.session_state.df_prelèvements)
+else:
+    st.info("Aucune donnée enregistrée pour le moment.")
+# ================================
+# 🔍 PRÉDICTION D’UN PARAMÈTRE MANQUANT (VERSION COMPLÈTE)
+# ================================
+st.header("🔍 Prédiction d’un paramètre manquant")
+
+# 🔁 Normes algériennes complètes avec conseils
 normes = {
     "Total Coliform": {"max": 0, "conseil": "Désinfecter le réseau et contrôler la source d’eau."},
     "Escherichia Coli": {"max": 0, "conseil": "Procéder à une chloration et vérifier les sources fécales."},
@@ -76,340 +431,238 @@ normes = {
     "Taste": {"max": 0, "conseil": "Analyser les composés désinfectants ou organiques."}
 }
 
-# Liste des 23 paramètres
 parametres = list(normes.keys())
 
-# ===========================
-# ⚠️ Vérification des normes
-# ===========================
-def verifier_parametres_entres(valeurs: dict):
-    alertes = []
-    for param, valeur in valeurs.items():
-        if param in normes:
-            règle = normes[param]
-            if ("min" in règle and valeur < règle["min"]) or ("max" in règle and valeur > règle["max"]):
-                min_val = règle.get("min", "-")
-                max_val = règle.get("max", "-")
-                conseil = règle.get("conseil", "")
-                alertes.append(f"⚠️ **{param} = {valeur:.2f}** est hors norme ({min_val} - {max_val}). 💡 {conseil}")
-    return alertes
-
-# ===========================
-# 📤 Fonction export Excel
-# ===========================
-def to_excel(df_to_export):
-    try:
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            df_to_export.to_excel(writer, index=False)
-        output.seek(0)
-        return output.read()
-    except:
-        return b""
-# ================================
-# 📋 GESTION JOURNALIÈRE DES PRÉLÈVEMENTS
-# ================================
-st.header("📋 Base de données des prélèvements journaliers")
-
-# Initialisation du DataFrame
-if "df_prelèvements" not in st.session_state:
-    try:
-        st.session_state.df_prelèvements = pd.read_pickle("prelevements_sauvegarde.pkl")
-    except:
-        st.session_state.df_prelèvements = pd.DataFrame()
-
-# Initialisation des paramètres dynamiques
-if "parametres_dynamiques" not in st.session_state:
-    st.session_state.parametres_dynamiques = []
-
-# === Saisie d’un nouveau prélèvement ===
-st.subheader("🧾 Ajouter un nouveau prélèvement")
-
-with st.form("form_prelevement"):
-    col1, col2 = st.columns(2)
-    with col1:
-        date = st.date_input("Date", value=datetime.today())
-        entreprise = st.text_input("Entreprise")
-        code = st.text_input("Code")
-        preleveur = st.text_input("Préleveur")
-    with col2:
-        heure = st.time_input("Heure")
-        localisation = st.text_input("Localisation")
-        analyste = st.text_input("Analyste")
-
-    st.markdown("### 🔬 Résultats d’analyse")
-    resultats = {}
-
-    for param in parametres:
-        resultats[param] = st.number_input(param, value=0.0, format="%.4f", key=f"gestion_{param}")
-
-    for param in st.session_state.parametres_dynamiques:
-        resultats[param] = st.number_input(param, value=0.0, format="%.4f", key=f"gestion_dyn_{param}")
-
-    # Validation
-    submitted = st.form_submit_button("✅ Enregistrer le prélèvement")
-    if submitted:
-        new_data = {
-            "Date": date, "Heure": heure, "Entreprise": entreprise,
-            "Localisation": localisation, "Code": code,
-            "Préleveur": preleveur, "Analyste": analyste
-        }
-        new_data.update(resultats)
-        st.session_state.df_prelèvements = pd.concat(
-            [st.session_state.df_prelèvements, pd.DataFrame([new_data])],
-            ignore_index=True
-        )
-        st.session_state.df_prelèvements.to_pickle("prelevements_sauvegarde.pkl")
-        st.success("✅ Prélèvement ajouté avec succès")
-        # Affichage alertes
-        for a in verifier_parametres_entres(resultats):
-            st.warning(a)
-
-# === Paramètres personnalisés ===
-st.subheader("⚙️ Ajouter ou supprimer un paramètre personnalisé")
-
-col_add, col_del = st.columns(2)
-with col_add:
-    new_param = st.text_input("Nouveau paramètre")
-    if st.button("➕ Ajouter"):
-        if new_param.strip() and new_param not in st.session_state.parametres_dynamiques:
-            st.session_state.parametres_dynamiques.append(new_param.strip())
-            st.success(f"Ajouté : {new_param}")
-
-with col_del:
-    if st.session_state.parametres_dynamiques:
-        to_delete = st.selectbox("Paramètre à supprimer", st.session_state.parametres_dynamiques)
-        if st.button("❌ Supprimer"):
-            st.session_state.parametres_dynamiques.remove(to_delete)
-            st.success(f"Supprimé : {to_delete}")
-# ================================
-# 🔍 PRÉDICTION D’UN PARAMÈTRE MANQUANT
-# ================================
-st.header("🔍 Prédiction d’un paramètre manquant")
-
+# Choix du paramètre cible
 parametre_cible = st.selectbox("Choisir le paramètre à prédire :", parametres)
-valeurs = {}
 
+# Saisie des autres paramètres
+valeurs_pred = {}
 st.markdown("### ✏️ Saisie des autres paramètres :")
 for param in parametres:
     if param != parametre_cible:
-        valeurs[param] = st.number_input(param, value=0.0, format="%.4f", key=f"pred_{param}")
+        valeurs_pred[param] = st.number_input(param, value=0.0, format="%.4f", key=f"pred_{param}")
 
-# Format d’entrée
-X = np.array([valeurs[p] for p in valeurs]).reshape(1, -1)
+X_input = np.array([valeurs_pred[p] for p in valeurs_pred]).reshape(1, -1)
 
-# === Modèle Random Forest ===
-model_rf_filename = f"modele_{parametre_cible.replace(' ', '_')}.pkl"
-if os.path.exists(model_rf_filename):
-    model_rf = joblib.load(model_rf_filename)
-    if st.button("📈 Prédire avec Random Forest", key="btn_rf"):
+# 🔍 Vérification intelligente des résultats
+def interpretation_pred(parametre, valeur_predite):
+    if parametre in normes:
+        règle = normes[parametre]
+        min_val = règle.get("min", None)
+        max_val = règle.get("max", None)
+        conseil = règle.get("conseil", "")
+        if (min_val is not None and valeur_predite < min_val) or (max_val is not None and valeur_predite > max_val):
+            st.warning(f"⚠️ Le résultat prédit est hors norme ({min_val} - {max_val}).")
+            st.info(f"💡 **Conseil** : {conseil}")
+        else:
+            st.success("✅ Le paramètre prédit est conforme aux normes algériennes.")
+    else:
+        st.info("ℹ️ Ce paramètre n'a pas de norme définie.")
+
+# === Prédiction Random Forest ===
+model_rf_file = f"modele_{parametre_cible.replace(' ', '_')}.pk1"
+if os.path.exists(model_rf_file):
+    model_rf = joblib.load(model_rf_file)
+    if st.button("📈 Prédire avec Random Forest"):
         try:
-            pred_rf = model_rf.predict(X)[0]
-            st.success(f"📊 Prédiction RF pour **{parametre_cible}** : `{pred_rf:.4f}`")
-            for a in verifier_parametres_entres({parametre_cible: pred_rf}):
-                st.warning(a)
+            pred_rf = model_rf.predict(X_input)[0]
+            st.success(f"📊 Valeur prédite (RF) pour **{parametre_cible}** : `{pred_rf:.4f}`")
+            interpretation_pred(parametre_cible, pred_rf)
         except Exception as e:
-            st.error(f"Erreur Random Forest : {e}")
-
-# === Modèle Deep Learning ===
-model_dnn_filename = f"modele_dnn_{parametre_cible.replace(' ', '_')}.h5"
-if os.path.exists(model_dnn_filename):
-    try:
-        model_dnn = load_model(model_dnn_filename)
-        if st.button("🤖 Prédire avec Deep Learning", key="btn_dnn"):
-            pred_dnn = model_dnn.predict(X)[0][0]
-            st.success(f"🤖 Prédiction DNN pour **{parametre_cible}** : `{pred_dnn:.4f}`")
-            for a in verifier_parametres_entres({parametre_cible: pred_dnn}):
-                st.warning(a)
-    except Exception as e:
-        st.error(f"Erreur Deep Learning : {e}")
+            st.error(f"Erreur avec Random Forest : {e}")
 else:
-    st.info("Aucun modèle trouvé pour ce paramètre.")
-# ================================
-# 🧪 CLASSIFICATION DE LA QUALITÉ DE L'EAU (RF + DNN)
-# ================================
-st.header("🧪 Classification de la qualité de l'eau")
+    st.warning(f"Modèle RF non trouvé : {model_rf_file}")
 
-# Encodage des classes (doit correspondre à l'entraînement)
-classes = {
-    0: "Bonne",
-    1: "Mauvaise",
-    2: "Moyenne",
-    3: "Très bonne",
-    4: "Très mauvaise"
-}
+# === Prédiction Deep Learning ===
+model_dnn_file = f"modele_dnn_{parametre_cible.replace(' ', '_')}.h5"
+if os.path.exists(model_dnn_file):
+    model_dnn = load_model(model_dnn_file)
+    if st.button("🤖 Prédire avec Deep Learning"):
+        try:
+            pred_dnn = model_dnn.predict(X_input)[0][0]
+            st.success(f"🤖 Valeur prédite (DNN) pour **{parametre_cible}** : `{pred_dnn:.4f}`")
+            interpretation_pred(parametre_cible, pred_dnn)
+        except Exception as e:
+            st.error(f"Erreur avec Deep Learning : {e}")
+else:
+    st.warning(f"Modèle DNN non trouvé : {model_dnn_file}")
+st.markdown("## 🧠 Classification intelligente de la qualité de l’eau")
 
 # Saisie des paramètres
 valeurs_class = {}
+st.markdown("### 🔢 Veuillez saisir les 23 paramètres pour la classification :")
 for param in parametres:
     valeurs_class[param] = st.number_input(param, value=0.0, format="%.4f", key=f"class_{param}")
 
 X_input = np.array([valeurs_class[p] for p in parametres]).reshape(1, -1)
 
-# === Modèle Random Forest
-if os.path.exists("modele_Classification.pkl"):
-    model_class_rf = joblib.load("modele_Classification.pkl")
-    if st.button("📈 Classifier avec Random Forest", key="btn_class_rf"):
-        y_pred_rf = model_class_rf.predict(X_input)[0]
-        classe_rf = classes.get(y_pred_rf, "Inconnue")
-        st.session_state["last_class_input"] = valeurs_class
-
-        st.success(f"✅ Classe prédite (RF) : **{classe_rf}**")
+# === Prédiction avec Random Forest
+if os.path.exists("modele_Classification.pk1"):
+    model_class_rf = joblib.load("modele_Classification.pk1")
+    if st.button("📊 Classifier avec Random Forest"):
+        prediction_rf = model_class_rf.predict(X_input)[0]
+        classe_rf = classes.get(prediction_rf, "Inconnue")
+        st.success(f"📈 Classe prédite avec Random Forest : **{classe_rf}**")
+        st.markdown("### 🧾 Interprétation et conseils :")
         for a in verifier_parametres_entres(valeurs_class):
             st.warning(a)
 
-# === Modèle Deep Learning
+# === Prédiction avec Deep Learning
 if os.path.exists("modele_dnn_classification.h5"):
-    model_class_dnn = load_model("modele_classification_dnn.h5")
-    if st.button("🤖 Classifier avec Deep Learning", key="btn_class_dnn"):
-        y_pred_dl = model_class_dnn.predict(X_input)
-        classe_dl = np.argmax(y_pred_dl, axis=1)[0]
+    model_class_dl = load_model("modele_dnn_classification.h5")
+    if st.button("🤖 Classifier avec Deep Learning"):
+        prediction_dl = model_class_dl.predict(X_input)
+        classe_dl = np.argmax(prediction_dl, axis=1)[0]
         label_dl = classes.get(classe_dl, "Inconnue")
-        st.success(f"🤖 Classe prédite (DNN) : **{label_dl}**")
+        st.success(f"🤖 Classe prédite avec Deep Learning : **{label_dl}**")
+        st.markdown("### 🧾 Interprétation et conseils :")
         for a in verifier_parametres_entres(valeurs_class):
             st.warning(a)
 
-# Affichage des classes disponibles
-with st.expander("📘 Voir les correspondances des classes encodées"):
+# Explication des classes
+with st.expander("ℹ️ Voir la signification des classes de qualité d’eau"):
     for code, label in classes.items():
         st.write(f"**{code}** → {label}")
-# ================================
-# 🧪 DÉTECTION DU TYPE DE POLLUTION
-# ================================
-st.header("☣️ Détection du type de pollution")
+from fpdf import FPDF
 
-def detecter_pollution_detaillee(data: dict):
-    types = []
-    details = []
+def generer_rapport_pdf(classe_predite, valeurs, alertes, methode="Random Forest"):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    
+    pdf.set_text_color(0, 102, 204)
+    pdf.cell(200, 10, txt="Rapport de Classification de la Qualité de l’Eau", ln=True, align='C')
+    
+    pdf.set_text_color(0, 0, 0)
+    pdf.ln(10)
+    pdf.set_font("Arial", style="B", size=11)
+    pdf.cell(200, 10, txt=f"🧠 Méthode : {methode}", ln=True)
+    pdf.cell(200, 10, txt=f"✅ Classe prédite : {classe_predite}", ln=True)
 
-    if data["Escherichia Coli"] > 0 or data["Total Coliform"] > 0 or data["Faecal Streptococci"] > 0:
-        types.append("Biologique")
-        details.append("Présence de bactéries indicatrices de contamination fécale.")
-
-    if data["Nitrate"] > 50 or data["Chlorates"] > 0.7 or data["Phosphate"] > 5 or data["Nitrite"] > 0.5:
-        types.append("Chimique")
-        details.append("Concentrations élevées en nitrates, chlorates, phosphates ou nitrites.")
-
-    if data["Ammonium"] > 0.5 or data["Turbidity"] > 5 or data["Complete Alkaline Title"] < 100:
-        types.append("Organique")
-        details.append("Indications de décomposition organique ou faible pouvoir tampon.")
-
-    if data["Iron"] > 0.3 or data["Manganese"] > 0.1 or data["Calcium"] > 200 or data["Magnesium"] > 50:
-        types.append("Métallique")
-        details.append("Excès de métaux ou minéraux dans l’eau.")
-
-    if data["pH"] < 6.5 or data["pH"] > 8.5 or data["Temperature"] > 25 or data["Conductivity"] > 2800:
-        types.append("Physico-chimique")
-        details.append("Paramètres physico-chimiques en dehors des normes.")
-
-    if len(types) == 0:
-        return "✅ Aucune pollution détectée", []
-    elif len(types) == 1:
-        return f"☣️ Pollution de type **{types[0]}**", details
-    else:
-        return f"☣️ Pollution multiple détectée : {', '.join(types)}", details
-
-# Utilisation des valeurs déjà saisies pour la classification
-pollution_label, pollution_details = detecter_pollution_detaillee(valeurs_class)
-
-st.info(pollution_label)
-if pollution_details:
-    with st.expander("📋 Détails de la pollution détectée"):
-        for d in pollution_details:
-            st.markdown(f"- {d}")
-
-# Visualisation des prélèvements #
-
-st.header("📊 Visualisation des prélèvements")
-
-df = st.session_state.df_prelèvements.copy()
-
-if not df.empty:
-    st.markdown("### 📈 Sélectionner un paramètre à visualiser")
-    param_to_plot = st.selectbox("Paramètre :", parametres)
-    group_by = st.radio("Comparer selon :", ["Date", "Entreprise", "Préleveur"])
-
-    df["Date"] = pd.to_datetime(df["Date"])
-
-    try:
-        if group_by == "Date":
-            chart = alt.Chart(df).mark_line(point=True).encode(
-                x='Date:T',
-                y=param_to_plot,
-                tooltip=['Date', param_to_plot]
-            ).properties(title=f"Évolution de {param_to_plot}")
-        else:
-            chart = alt.Chart(df).mark_bar().encode(
-                x=alt.X(group_by, sort='-y'),
-                y=param_to_plot,
-                tooltip=[group_by, param_to_plot],
-                color=alt.condition(
-                    alt.datum[param_to_plot] > normes.get(param_to_plot, {}).get("max", 999),
-                    alt.value('red'),
-                    alt.value('green')
-                ) if param_to_plot in normes else alt.value("steelblue")
-            ).properties(title=f"{param_to_plot} par {group_by}")
-
-        st.altair_chart(chart, use_container_width=True)
-    except Exception as e:
-        st.warning(f"Erreur de graphique : {e}")
-else:
-    st.info("Aucune donnée disponible à visualiser.")
-# Export des données
-st.header("📤 Export des données enregistrées")
-
-if not df.empty:
-    # 📁 Export Excel
-    excel_data = to_excel(df)
-    st.download_button("📥 Télécharger en Excel", data=excel_data,
-                       file_name="prelevements_eau.xlsx",
-                       mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-
-    # 📄 Export PDF
-    from fpdf import FPDF
-
-    def to_pdf(dataframe):
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", size=10)
-        pdf.cell(200, 10, txt="Rapport des prélèvements d'eau", ln=True, align='C')
-
-        col_names = list(dataframe.columns)
-        col_width = 180 / len(col_names)
-
-        pdf.set_font("Arial", 'B', 8)
-        for col in col_names:
-            pdf.cell(col_width, 8, col[:15], border=1)
-        pdf.ln()
-
-        pdf.set_font("Arial", size=7)
-        for i, row in dataframe.iterrows():
-            for col in col_names:
-                val = str(row[col])[:15]
-                pdf.cell(col_width, 8, val, border=1)
+    pdf.ln(5)
+    pdf.set_font("Arial", style="B", size=10)
+    pdf.cell(200, 10, txt="📌 Paramètres analysés :", ln=True)
+    
+    pdf.set_font("Arial", size=9)
+    for k, v in valeurs.items():
+        pdf.cell(95, 8, f"{k}: {v:.2f}", ln=False)
+        if (list(valeurs.keys()).index(k) + 1) % 2 == 0:
             pdf.ln()
-            if i == 20:  # Limiter à 20 lignes
-                pdf.cell(200, 10, "… (données tronquées)", ln=True, align='C')
-                break
 
-        output_pdf = io.BytesIO()
-        pdf.output(output_pdf)
-        return output_pdf.getvalue()
+    pdf.ln(10)
+    if alertes:
+        pdf.set_font("Arial", style="B", size=10)
+        pdf.set_text_color(255, 0, 0)
+        pdf.cell(200, 10, txt="⚠️ Paramètres hors normes :", ln=True)
+        pdf.set_font("Arial", size=9)
+        pdf.set_text_color(0, 0, 0)
+        for alerte in alertes:
+            pdf.multi_cell(0, 8, alerte)
+    else:
+        pdf.set_text_color(0, 150, 0)
+        pdf.cell(200, 10, txt="Tous les paramètres sont dans les normes ✅", ln=True)
 
-    try:
-        pdf_data = to_pdf(df)
-        st.download_button("📄 Télécharger en PDF", data=pdf_data,
-                           file_name="rapport_prelevements.pdf",
-                           mime="application/pdf")
-    except Exception as e:
-        st.warning(f"Erreur PDF : {e}")
-else:
-    st.info("Aucune donnée à exporter.")
+    buffer = io.BytesIO()
+    pdf.output(buffer)
+    buffer.seek(0)
+    return buffer
+# === Bloc : Détection automatique du type de pollution ===
+st.header("🧪 Détection du type de pollution")
 
-# Traitement d'un fichier excel
-st.header("📂 Traitement d’un fichier Excel")
+valeurs_pollution = {}
+for param in parametres:
+    valeurs_pollution[param] = st.number_input(f"{param}", value=0.0, format="%.4f", key=f"poll_{param}")
 
-uploaded_file = st.file_uploader("Téléverser un fichier contenant les données d’analyse", type=["xlsx", "csv"])
+def detecter_type_pollution(valeurs):
+    types = set()
+
+    if valeurs["Escherichia Coli"] > 0 or valeurs["Total Coliform"] > 0 or valeurs["Faecal Streptococci"] > 0:
+        types.add("biologique")
+    if valeurs["Nitrate"] > 50 or valeurs["Nitrite"] > 0.5 or valeurs["Chlorates"] > 0.7 or valeurs["Phosphate"] > 5:
+        types.add("chimique")
+    if valeurs["Ammonium"] > 0.5 or valeurs["Turbidity"] > 5 or valeurs["Temperature"] > 25:
+        types.add("organique")
+    if valeurs["Iron"] > 0.3 or valeurs["Manganese"] > 0.1:
+        types.add("métallique")
+    if valeurs["Calcium"] > 200 or valeurs["Magnesium"] > 50 or valeurs["Sulfate"] > 250 or valeurs["Dry Residue"] > 1500:
+        types.add("minéralogique")
+    if valeurs["Smell"] > 0 or valeurs["Taste"] > 0 or valeurs["Colour"] > 0:
+        types.add("sensorielle")
+
+    if not types:
+        return ["aucune"], []
+
+    # Recommandations automatiques
+    conseils = []
+    for t in types:
+        if t == "biologique":
+            conseils.append("🔬 Pollution biologique détectée : désinfecter le réseau, vérifier la source.")
+        elif t == "chimique":
+            conseils.append("🧪 Pollution chimique détectée : contrôler les intrants agricoles ou industriels.")
+        elif t == "organique":
+            conseils.append("🧫 Pollution organique détectée : renforcer la filtration et l’assainissement.")
+        elif t == "métallique":
+            conseils.append("⚙️ Pollution métallique détectée : utiliser des filtres spécifiques (Fe/Mn).")
+        elif t == "minéralogique":
+            conseils.append("🧱 Pollution minéralogique détectée : vérifier la source et réduire les minéraux dissous.")
+        elif t == "sensorielle":
+            conseils.append("👃 Pollution sensorielle détectée : analyser les composés organoleptiques.")
+
+    return list(types), conseils
+
+if st.button("🧠 Détecter le type de pollution", key="btn_detect_pollution"):
+    types_detectés, conseils = detecter_type_pollution(valeurs_pollution)
+    
+    if "aucune" in types_detectés:
+        st.success("✅ Aucune pollution détectée selon les normes.")
+    else:
+        st.error(f"⚠️ Types de pollution détectés : {', '.join(types_detectés).capitalize()}")
+        for c in conseils:
+            st.info(c)
+# === 🤖 PAGE ASSISTANT IA ===
+if st.session_state.page_active == "assistant":
+    st.title("🤖 Assistant IA – Aide et support intelligent")
+
+    load_dotenv()
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+
+    # Historique de conversation
+    if "messages" not in st.session_state:
+        st.session_state.messages = [{"role": "assistant", "content": "Bonjour 👋, je suis l’assistant IA. Posez-moi vos questions sur l’application ou la qualité de l’eau."}]
+
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+
+    # Zone de saisie utilisateur
+    if prompt := st.chat_input("Posez votre question ici..."):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        # Appel à l’API OpenAI
+        try:
+            with st.chat_message("assistant"):
+                with st.spinner("Réflexion..."):
+                    completion = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=st.session_state.messages
+                    )
+                    response = completion.choices[0].message.content
+                    st.markdown(response)
+
+            st.session_state.messages.append({"role": "assistant", "content": response})
+
+        except Exception as e:
+            st.error(f"Erreur d’appel à l’API OpenAI : {e}")
+import base64
+from fpdf import FPDF
+
+st.header("📂 Importer / Exporter un fichier Excel ou CSV")
+
+# === Import du fichier utilisateur
+uploaded_file = st.file_uploader("📤 Charger un fichier contenant les paramètres d’analyse", type=["xlsx", "csv"])
 
 if uploaded_file:
     try:
@@ -418,33 +671,35 @@ if uploaded_file:
         else:
             df_uploaded = pd.read_excel(uploaded_file)
 
-        st.success("✅ Fichier chargé avec succès.")
-        st.dataframe(df_uploaded.head())
+        st.success("✅ Fichier importé avec succès !")
+        st.dataframe(df_uploaded)
 
-        action = st.selectbox("Choisir une action :", ["Classification", "Prédiction d’un paramètre", "Type de pollution"])
+        # Choix d’action
+        action = st.selectbox("Sélectionnez une action à appliquer :", ["Aucune", "Classification", "Prédiction d'un paramètre", "Détection du type de pollution"])
 
         if action == "Classification":
-            model_class = joblib.load("modele_Classification.pkl")
+            model_class = joblib.load("modele_Classification.pk1")
             X = df_uploaded[parametres]
             y_pred = model_class.predict(X)
-            classes = {3: "Très bonne", 0: "Bonne", 2: "Moyenne", 1: "Mauvaise", 4: "Très mauvaise"}
+            classes = {0: "Bonne", 1: "Mauvaise", 2: "Moyenne", 3: "Très bonne", 4: "Très mauvaise"}
             df_uploaded["Classe Prédite"] = [classes.get(i, "Inconnue") for i in y_pred]
+            st.success("✅ Classification effectuée.")
             st.dataframe(df_uploaded)
 
-        elif action == "Prédiction d’un paramètre":
-            param_to_predict = st.selectbox("Quel paramètre manque-t-il ?", parametres)
-            input_cols = [p for p in parametres if p != param_to_predict]
-            model_file = f"modele_{param_to_predict.replace(' ', '_')}.pkl"
+        elif action == "Prédiction d'un paramètre":
+            param_to_predict = st.selectbox("Quel paramètre voulez-vous prédire ?", parametres)
+            model_file = f"modele_{param_to_predict.replace(' ', '_')}.pk1"
             if os.path.exists(model_file):
-                model_pred = joblib.load(model_file)
-                X = df_uploaded[input_cols]
-                pred = model_pred.predict(X)
-                df_uploaded[f"{param_to_predict} Prédit"] = pred
+                model = joblib.load(model_file)
+                input_cols = [p for p in parametres if p != param_to_predict]
+                pred = model.predict(df_uploaded[input_cols])
+                df_uploaded[f"{param_to_predict}_Prédit"] = pred
+                st.success(f"✅ Prédiction du paramètre {param_to_predict} terminée.")
                 st.dataframe(df_uploaded)
             else:
-                st.warning("Modèle non trouvé pour ce paramètre.")
+                st.warning(f"❌ Modèle non trouvé pour {param_to_predict}")
 
-        elif action == "Type de pollution":
+        elif action == "Détection du type de pollution":
             def detect_pollution(row):
                 types = []
                 if row["Escherichia Coli"] > 0 or row["Total Coliform"] > 0:
@@ -455,88 +710,66 @@ if uploaded_file:
                     types.append("organique")
                 if row["Iron"] > 0.3 or row["Manganese"] > 0.1:
                     types.append("métallique")
-                if not types:
-                    return "aucune"
-                elif len(types) == 1:
-                    return types[0]
-                else:
-                    return "multiple"
+                return "multiple" if len(types) > 1 else (types[0] if types else "aucune")
 
-            df_uploaded["Type de Pollution"] = df_uploaded.apply(detect_pollution, axis=1)
+            df_uploaded["Type de pollution"] = df_uploaded.apply(detect_pollution, axis=1)
+            st.success("✅ Type de pollution détecté.")
             st.dataframe(df_uploaded)
 
-        st.download_button("📥 Télécharger les résultats", to_excel(df_uploaded),
-                           file_name="resultats_predictions.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        # === Bouton Export Excel
+        def to_excel(dataframe):
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                dataframe.to_excel(writer, index=False, sheet_name="Résultats")
+            output.seek(0)
+            return output.read()
+
+        excel_data = to_excel(df_uploaded)
+
+        st.download_button(
+            label="📥 Télécharger les résultats (Excel)",
+            data=excel_data,
+            file_name="resultats_analyse_eau.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+        # === Bouton Export PDF
+        def to_pdf(df):
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", size=10)
+            pdf.cell(200, 10, txt="Rapport des résultats d’analyse de la qualité de l’eau", ln=True, align='C')
+            pdf.ln(10)
+
+            cols = list(df.columns)
+            col_width = 180 / len(cols)
+
+            pdf.set_font("Arial", 'B', 7)
+            for col in cols:
+                pdf.cell(col_width, 8, col[:15], border=1)
+            pdf.ln()
+
+            pdf.set_font("Arial", size=7)
+            for i, row in df.iterrows():
+                for col in cols:
+                    pdf.cell(col_width, 8, str(row[col])[:15], border=1)
+                pdf.ln()
+                if i >= 30:
+                    pdf.cell(200, 10, "… (résultats tronqués)", ln=True, align='C')
+                    break
+
+            output = io.BytesIO()
+            pdf.output(output)
+            return output.getvalue()
+
+        pdf_bytes = to_pdf(df_uploaded)
+
+        st.download_button(
+            label="📄 Télécharger le rapport PDF",
+            data=pdf_bytes,
+            file_name="rapport_resultats_eau.pdf",
+            mime="application/pdf"
+        )
 
     except Exception as e:
-        st.error(f"Erreur de traitement : {e}")
-# ==================================
-# 🤖 Assistance IA (Chatbot local)
-# ==================================
-st.markdown("### 🤖 Assistance intelligente (Chatbot local)")
-st.info("Posez une question ou décrivez un problème. L’assistant vous guidera !")
-
-# Base de connaissances simple
-faq_reponses = {
-    "ajouter prélèvement": "Pour ajouter un prélèvement, allez dans 'Base de données', puis remplissez les champs et cliquez sur 'Enregistrer'.",
-    "supprimer paramètre": "Dans la section 'Base de données', utilisez le bouton ❌ pour retirer un paramètre personnalisé.",
-    "prédiction": "Rendez-vous dans la section 'Prédiction', choisissez un paramètre et cliquez sur 'Prédire avec Random Forest' ou 'Deep Learning'.",
-    "classification": "Dans la section 'Classification', saisissez les valeurs des paramètres, puis cliquez sur 'Classifier'.",
-    "export": "Allez dans la section 'Export' pour télécharger les résultats en Excel ou PDF.",
-    "fichier excel": "Téléversez un fichier Excel ou CSV contenant vos résultats, et sélectionnez l'action souhaitée.",
-    "erreur": "Veuillez vérifier que tous les champs requis sont remplis, ou que le modèle demandé est bien présent dans le dossier."
-}
-
-# Interface utilisateur
-user_question = st.text_input("❓ Votre question ou problème :", key="chat_input")
-if st.button("🧠 Obtenir de l’aide", key="btn_chatbot"):
-    reponse = "🤖 Je n’ai pas compris votre question. Essayez d’utiliser des mots-clés comme 'prédiction', 'ajouter prélèvement', 'fichier excel'..."
-    for mot_cle, texte in faq_reponses.items():
-        if mot_cle in user_question.lower():
-            reponse = texte
-            break
-    st.success(reponse)
-# ========== 🤖 Assistance IA - Chatbot OpenAI ==========
-import openai
-from dotenv import load_dotenv
-
-# Charger la clé API depuis .env
-load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
-st.markdown("## 🤖 Assistance intelligente - Chatbot IA")
-
-with st.expander("💬 Ouvrir le chatbot d’aide", expanded=True):
-    if "messages" not in st.session_state:
-        st.session_state.messages = [
-            {"role": "system", "content": "Tu es un assistant expert en analyse de la qualité de l’eau, en normes algériennes, et en IA appliquée à l’eau. Donne des réponses claires, professionnelles, et utiles."}
-        ]
-
-    for msg in st.session_state.messages[1:]:  # on saute le système
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
-
-    prompt = st.chat_input("Pose ta question ici...")
-
-    if prompt:
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
-
-        with st.chat_message("assistant"):
-            with st.spinner("Réflexion en cours..."):
-                try:
-                    response = openai.ChatCompletion.create(
-                        model="gpt-3.5-turbo",
-                        messages=st.session_state.messages
-                    )
-                    reply = response.choices[0].message["content"]
-                    st.markdown(reply)
-                    st.session_state.messages.append({"role": "assistant", "content": reply})
-                except Exception as e:
-                    st.error(f"Erreur lors de la requête OpenAI : {e}")
-
-
-
-
-
+        st.error(f"❌ Erreur de traitement : {e}")
