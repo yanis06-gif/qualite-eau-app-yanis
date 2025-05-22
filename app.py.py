@@ -342,7 +342,7 @@ else:
 # ================================
 st.header("🔍 Prédiction d’un paramètre manquant")
 
-# 🔁 Normes algériennes complètes avec conseils
+# 🔧 Normes algériennes des 23 paramètres et conseils
 normes = {
     "Total Coliform": {"max": 0, "conseil": "Désinfecter le réseau et contrôler la source d’eau."},
     "Escherichia Coli": {"max": 0, "conseil": "Procéder à une chloration et vérifier les sources fécales."},
@@ -369,63 +369,64 @@ normes = {
     "Taste": {"max": 0, "conseil": "Analyser les composés désinfectants ou organiques."}
 }
 
-parametres = list(normes.keys())
+# ✅ Fonction de vérification des normes
+def verifier_parametres_entres(valeurs: dict):
+    alertes = []
+    for param, valeur in valeurs.items():
+        if param in normes:
+            règle = normes[param]
+            if ("min" in règle and valeur < règle["min"]) or ("max" in règle and valeur > règle["max"]):
+                min_val = règle.get("min", "-")
+                max_val = règle.get("max", "-")
+                conseil = règle.get("conseil", "")
+                alertes.append(f"⚠️ **{param} = {valeur:.2f}** est hors norme ({min_val} - {max_val}). 💡 {conseil}")
+    return alertes
+
+st.subheader("🔍 Prédiction d’un paramètre manquant (IA)")
 
 # Choix du paramètre cible
 parametre_cible = st.selectbox("Choisir le paramètre à prédire :", parametres)
 
 # Saisie des autres paramètres
 valeurs_pred = {}
-st.markdown("### ✏️ Saisie des autres paramètres :")
+st.markdown("### ✏️ Saisissez les valeurs mesurées :")
 for param in parametres:
     if param != parametre_cible:
         valeurs_pred[param] = st.number_input(param, value=0.0, format="%.4f", key=f"pred_{param}")
 
+# Conversion en tableau
 X_input = np.array([valeurs_pred[p] for p in valeurs_pred]).reshape(1, -1)
 
-# 🔍 Vérification intelligente des résultats
-def interpretation_pred(parametre, valeur_predite):
-    if parametre in normes:
-        règle = normes[parametre]
-        min_val = règle.get("min", None)
-        max_val = règle.get("max", None)
-        conseil = règle.get("conseil", "")
-        if (min_val is not None and valeur_predite < min_val) or (max_val is not None and valeur_predite > max_val):
-            st.warning(f"⚠️ Le résultat prédit est hors norme ({min_val} - {max_val}).")
-            st.info(f"💡 **Conseil** : {conseil}")
-        else:
-            st.success("✅ Le paramètre prédit est conforme aux normes algériennes.")
-    else:
-        st.info("ℹ️ Ce paramètre n'a pas de norme définie.")
-
-# === Prédiction Random Forest ===
-model_rf_file = f"modele_{parametre_cible.replace(' ', '_')}.pk1"
-if os.path.exists(model_rf_file):
-    model_rf = joblib.load(model_rf_file)
+# ============================
+# 🌲 Prédiction avec Random Forest
+# ============================
+model_rf_filename = f"modele_{parametre_cible.replace(' ', '_')}.pk1"
+if os.path.exists(model_rf_filename):
+    model_rf = joblib.load(model_rf_filename)
     if st.button("📈 Prédire avec Random Forest"):
-        try:
-            pred_rf = model_rf.predict(X_input)[0]
-            st.success(f"📊 Valeur prédite (RF) pour **{parametre_cible}** : `{pred_rf:.4f}`")
-            interpretation_pred(parametre_cible, pred_rf)
-        except Exception as e:
-            st.error(f"Erreur avec Random Forest : {e}")
+        pred_rf = model_rf.predict(X_input)[0]
+        st.success(f"🌲 Résultat RF : **{parametre_cible} = {pred_rf:.4f}**")
+        for alerte in verifier_parametres_entres({parametre_cible: pred_rf}):
+            st.warning(alerte)
 else:
-    st.warning(f"Modèle RF non trouvé : {model_rf_file}")
+    st.warning(f"Modèle Random Forest indisponible pour {parametre_cible}")
 
-# === Prédiction Deep Learning ===
-model_dnn_file = f"modele_dnn_{parametre_cible.replace(' ', '_')}.h5"
-if os.path.exists(model_dnn_file):
-    model_dnn = load_model(model_dnn_file, compile=False)
-    if st.button("🤖 Prédire avec Deep Learning"):
-        try:
+# ============================
+# 🤖 Prédiction avec Deep Learning
+# ============================
+model_dnn_filename = f"modele_dnn_{parametre_cible.replace(' ', '_')}.h5"
+if os.path.exists(model_dnn_filename):
+    try:
+        model_dnn = load_model(model_dnn_filename, compile=False)
+        if st.button("🤖 Prédire avec Deep Learning"):
             pred_dnn = model_dnn.predict(X_input)[0][0]
-            st.success(f"🤖 Valeur prédite (DNN) pour **{parametre_cible}** : `{pred_dnn:.4f}`")
-            interpretation_pred(parametre_cible, pred_dnn)
-        except Exception as e:
-            st.error(f"Erreur avec Deep Learning : {e}")
+            st.success(f"🤖 Résultat DNN : **{parametre_cible} = {pred_dnn:.4f}**")
+            for alerte in verifier_parametres_entres({parametre_cible: pred_dnn}):
+                st.warning(alerte)
+    except Exception as e:
+        st.error(f"Erreur lors du chargement du modèle DNN : {e}")
 else:
-    st.warning(f"Modèle DNN non trouvé : {model_dnn_file}")
-st.markdown("## 🧠 Classification intelligente de la qualité de l’eau")
+    st.warning(f"Modèle DNN indisponible pour {parametre_cible}")
 
 # Saisie des paramètres
 valeurs_class = {}
