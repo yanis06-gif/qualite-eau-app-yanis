@@ -57,18 +57,8 @@ h1, h2, h3 {
     text-align: center;
     margin-bottom: 20px;
 }
-.image-container {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
-}
-.image-container img {
-    width: 300px;
-    margin: 0 10px;
-}
 </style>
 """, unsafe_allow_html=True)
-
 # Fonction pour afficher la page d'accueil
 def show_home_page():
     st.title("💧 Application d'Analyse de la Qualité de l'Eau")
@@ -79,15 +69,8 @@ def show_home_page():
     </div>
     """, unsafe_allow_html=True)
 
-    # Ajout d'images d'illustration
-    st.markdown("<div class='image-container'>", unsafe_allow_html=True)
-    st.markdown("<img src='https://example.com/image1.jpg' alt='Image 1'>", unsafe_allow_html=True)  # Remplacez par vos images
-    st.markdown("<img src='https://example.com/image2.jpg' alt='Image 2'>", unsafe_allow_html=True)  # Remplacez par vos images
-    st.markdown("</div>", unsafe_allow_html=True)
-
     if st.button("🚀 Accéder à l'application"):
         st.session_state.page = "main"
-
 # Fonction pour afficher le menu de navigation
 def show_navigation():
     st.sidebar.title("🌐 Navigation")
@@ -101,21 +84,8 @@ def show_navigation():
         "Exportation"
     ])
     st.session_state.page = page
-
-# Fonction pour afficher la page principale
-def show_main_page():
-    st.title("💧 Analyse de la Qualité de l'Eau")
-    st.markdown("Cette application permet de surveiller, analyser et prédire la qualité de l'eau selon les normes algériennes (NA 6361-2016).")
-
-    # Liste des 23 paramètres
-    parametres = [
-        'Total Coliform', 'Escherichia Coli', 'Faecal Streptococci', 'Turbidity', 'pH', 'Temperature',
-        'Free Chlorine', 'Chlorates', 'Sulfate', 'Magnesium', 'Calcium', 'Conductivity', 'Dry Residue',
-        'Complete Alkaline Title', 'Nitrite', 'Ammonium', 'Phosphate', 'Nitrate', 'Iron', 'Manganese',
-        'Colour', 'Smell', 'Taste'
-    ]
-
-    # Gestion des prélèvements
+# Fonction pour gérer les prélèvements
+def manage_samples():
     st.header("📋 Gestion des Prélèvements Journaliers")
     if "df_prelèvements" not in st.session_state:
         st.session_state.df_prelèvements = pd.DataFrame(columns=["Date", "Heure", "Entreprise", "Code", "Préleveur", "Localisation", "Analyste"] + parametres)
@@ -160,8 +130,9 @@ def show_main_page():
         st.dataframe(st.session_state.df_prelèvements)
     else:
         st.info("Aucune donnée enregistrée pour le moment.")
-
-    # Chargement du fichier utilisateur
+# Fonction pour la classification
+def classify_samples():
+    st.header("🧪 Classification de la Qualité de l'Eau")
     uploaded_file = st.file_uploader("📤 Charger un fichier contenant les paramètres d’analyse", type=["xlsx", "csv"])
 
     if uploaded_file:
@@ -178,114 +149,161 @@ def show_main_page():
             if not all(param in df_uploaded.columns for param in parametres):
                 st.error("❌ Le fichier importé ne contient pas toutes les colonnes nécessaires.")
             else:
-                # Choix d’action
-                action = st.selectbox("Sélectionnez une action à appliquer :", ["Aucune", "Classification", "Prédiction d'un paramètre", "Détection du type de pollution"])
+                model_class = joblib.load("modele_Classification.pk1")
+                X = df_uploaded[parametres]
+                y_pred = model_class.predict(X)
+                classes = {0: "Bonne", 1: "Mauvaise", 2: "Moyenne", 3: "Très bonne", 4: "Très mauvaise"}
+                df_uploaded["Classe Prédite"] = [classes.get(i, "Inconnue") for i in y_pred]
+                st.success("✅ Classification effectuée.")
+                st.dataframe(df_uploaded)
 
-                if action == "Classification":
-                    model_class = joblib.load("modele_Classification.pk1")
-                    X = df_uploaded[parametres]
-                    y_pred = model_class.predict(X)
-                    classes = {0: "Bonne", 1: "Mauvaise", 2: "Moyenne", 3: "Très bonne", 4: "Très mauvaise"}
-                    df_uploaded["Classe Prédite"] = [classes.get(i, "Inconnue") for i in y_pred]
-                    st.success("✅ Classification effectuée.")
-                    st.dataframe(df_uploaded)
+                # Conseils après classification
+                st.markdown("### 📝 Conseils après Classification")
+                for index, row in df_uploaded.iterrows():
+                    classe = row["Classe Prédite"]
+                    if classe == "Mauvaise":
+                        st.warning(f"⚠️ Prélèvement {index + 1}: La qualité de l'eau est **Mauvaise**. Recommandation: Vérifiez la source et effectuez des tests supplémentaires.")
+                    elif classe == "Moyenne":
+                        st.info(f"ℹ️ Prélèvement {index + 1}: La qualité de l'eau est **Moyenne**. Recommandation: Surveillez régulièrement la qualité.")
+                    elif classe == "Bonne":
+                        st.success(f"✅ Prélèvement {index + 1}: La qualité de l'eau est **Bonne**. Continuez à surveiller.")
 
-                    # Conseils après classification
-                    st.markdown("### 📝 Conseils après Classification")
-                    for index, row in df_uploaded.iterrows():
-                        classe = row["Classe Prédite"]
-                        if classe == "Mauvaise":
-                            st.warning(f"⚠️ Prélèvement {index + 1}: La qualité de l'eau est **Mauvaise**. Recommandation: Vérifiez la source et effectuez des tests supplémentaires.")
-                        elif classe == "Moyenne":
-                            st.info(f"ℹ️ Prélèvement {index + 1}: La qualité de l'eau est **Moyenne**. Recommandation: Surveillez régulièrement la qualité.")
-                        elif classe == "Bonne":
-                            st.success(f"✅ Prélèvement {index + 1}: La qualité de l'eau est **Bonne**. Continuez à surveiller.")
+        except Exception as e:
+            st.error(f"❌ Erreur de traitement : {e}")
+# Fonction pour prédire un paramètre
+def predict_parameter():
+    st.header("🔍 Prédiction d’un Paramètre Manquant")
+    parametres = [
+        'Total Coliform', 'Escherichia Coli', 'Faecal Streptococci', 'Turbidity', 'pH', 'Temperature',
+        'Free Chlorine', 'Chlorates', 'Sulfate', 'Magnesium', 'Calcium', 'Conductivity', 'Dry Residue',
+        'Complete Alkaline Title', 'Nitrite', 'Ammonium', 'Phosphate', 'Nitrate', 'Iron', 'Manganese',
+        'Colour', 'Smell', 'Taste'
+    ]
 
-                elif action == "Prédiction d'un paramètre":
-                    param_to_predict = st.selectbox("Quel paramètre voulez-vous prédire ?", parametres)
-                    model_file = f"modele_{param_to_predict.replace(' ', '_')}.pk1"
-                    if os.path.exists(model_file):
-                        model = joblib.load(model_file)
-                        input_cols = [p for p in parametres if p != param_to_predict]
-                        pred = model.predict(df_uploaded[input_cols])
-                        df_uploaded[f"{param_to_predict}_Prédit"] = pred
-                        st.success(f"✅ Prédiction du paramètre {param_to_predict} terminée.")
-                        st.dataframe(df_uploaded)
-                    else:
-                        st.warning(f"❌ Modèle non trouvé pour {param_to_predict}")
+    # Choix du paramètre cible
+    parametre_cible = st.selectbox("Choisir le paramètre à prédire :", parametres)
 
-                elif action == "Détection du type de pollution":
-                    def detect_pollution(row):
-                        types = []
-                        if row["Escherichia Coli"] > 0 or row["Total Coliform"] > 0:
-                            types.append("biologique")
-                        if row["Nitrate"] > 50 or row["Chlorates"] > 0.7:
-                            types.append("chimique")
-                        if row["Ammonium"] > 0.5 or row["Turbidity"] > 5:
-                            types.append("organique")
-                        if row["Iron"] > 0.3 or row["Manganese"] > 0.1:
-                            types.append("métallique")
-                        return "multiple" if len(types) > 1 else (types[0] if types else "aucune")
+    # Saisie des autres paramètres
+    valeurs_pred = {}
+    st.markdown("### ✏️ Saisie des autres paramètres :")
+    for param in parametres:
+        if param != parametre_cible:
+            valeurs_pred[param] = st.number_input(param, value=0.0, format="%.4f", key=f"pred_{param}")
 
-                    df_uploaded["Type de pollution"] = df_uploaded.apply(detect_pollution, axis=1)
-                    st.success("✅ Type de pollution détecté.")
-                    st.dataframe(df_uploaded)
+    X_input = np.array([valeurs_pred[p] for p in valeurs_pred]).reshape(1, -1)
 
-                # Exporter les résultats en Excel
-                def to_excel(dataframe):
-                    output = io.BytesIO()
-                    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                        dataframe.to_excel(writer, index=False, sheet_name="Résultats")
-                    output.seek(0)
-                    return output.read()
+    # Prédiction avec Random Forest
+    model_rf_file = f"modele_{parametre_cible.replace(' ', '_')}.pk1"
+    if os.path.exists(model_rf_file):
+        model_rf = joblib.load(model_rf_file)
+        if st.button("📈 Prédire avec Random Forest"):
+            try:
+                pred_rf = model_rf.predict(X_input)[0]
+                st.success(f"📊 Valeur prédite (RF) pour **{parametre_cible}** : `{pred_rf:.4f}`")
+            except Exception as e:
+                st.error(f"Erreur avec Random Forest : {e}")
+    else:
+        st.warning(f"Modèle RF non trouvé : {model_rf_file}")
 
-                excel_data = to_excel(df_uploaded)
+    # Prédiction avec Deep Learning
+    model_dnn_file = f"modele_dnn_{parametre_cible.replace(' ', '_')}.h5"
+    if os.path.exists(model_dnn_file):
+        model_dnn = load_model(model_dnn_file)
+        if st.button("🤖 Prédire avec Deep Learning"):
+            try:
+                pred_dnn = model_dnn.predict(X_input)[0][0]
+                st.success(f"🤖 Valeur prédite (DNN) pour **{parametre_cible}** : `{pred_dnn:.4f}`")
+            except Exception as e:
+                st.error(f"Erreur avec Deep Learning : {e}")
+    else:
+        st.warning(f"Modèle DNN non trouvé : {model_dnn_file}")
+# Fonction pour détecter le type de pollution
+def detect_pollution():
+    st.header("🧪 Détection du Type de Pollution")
 
-                st.download_button(
-                    label="📥 Télécharger les résultats (Excel)",
-                    data=excel_data,
-                    file_name="resultats_analyse_eau.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                )
+    valeurs_pollution = {}
+    for param in parametres:
+        valeurs_pollution[param] = st.number_input(f"{param}", value=0.0, format="%.4f", key=f"poll_{param}")
 
-                # Exporter les résultats en PDF
-                def to_pdf(df):
-                    pdf = FPDF()
-                    pdf.add_page()
-                    pdf.set_font("Arial", size=10)
-                    pdf.cell(200, 10, txt="Rapport des résultats d’analyse de la qualité de l’eau", ln=True, align='C')
-                    pdf.ln(10)
+    def detecter_type_pollution(valeurs):
+        types = set()
 
-                    cols = list(df.columns)
-                    col_width = 180 / len(cols)
+        if valeurs["Escherichia Coli"] > 0 or valeurs["Total Coliform"] > 0 or valeurs["Faecal Streptococci"] > 0:
+            types.add("biologique")
+        if valeurs["Nitrate"] > 50 or valeurs["Nitrite"] > 0.5 or valeurs["Chlorates"] > 0.7 or valeurs["Phosphate"] > 5:
+            types.add("chimique")
+        if valeurs["Ammonium"] > 0.5 or valeurs["Turbidity"] > 5 or valeurs["Temperature"] > 25:
+            types.add("organique")
+        if valeurs["Iron"] > 0.3 or valeurs["Manganese"] > 0.1:
+            types.add("métallique")
+        if valeurs["Calcium"] > 200 or valeurs["Magnesium"] > 50 or valeurs["Sulfate"] > 250 or valeurs["Dry Residue"] > 1500:
+            types.add("minéralogique")
+        if valeurs["Smell"] > 0 or valeurs["Taste"] > 0 or valeurs["Colour"] > 0:
+            types.add("sensorielle")
 
-                    pdf.set_font("Arial", 'B', 7)
-                    for col in cols:
-                        pdf.cell(col_width, 8, col[:15], border=1)
-                    pdf.ln()
+        if not types:
+            return ["aucune"], []
 
-                    pdf.set_font("Arial", size=7)
-                    for i, row in df.iterrows():
-                        for col in cols:
-                            pdf.cell(col_width, 8, str(row[col])[:15], border=1)
-                        pdf.ln()
-                        if i >= 30:
-                            pdf.cell(200, 10, "… (résultats tronqués)", ln=True, align='C')
-                            break
+        # Recommandations automatiques
+        conseils = []
+        for t in types:
+            if t == "biologique":
+                conseils.append("🔬 Pollution biologique détectée : désinfecter le réseau, vérifier la source.")
+            elif t == "chimique":
+                conseils.append("🧪 Pollution chimique détectée : contrôler les intrants agricoles ou industriels.")
+            elif t == "organique":
+                conseils.append("🧫 Pollution organique détectée : renforcer la filtration et l’assainissement.")
+            elif t == "métallique":
+                conseils.append("⚙️ Pollution métallique détectée : utiliser des filtres spécifiques (Fe/Mn).")
+            elif t == "minéralogique":
+                conseils.append("🧱 Pollution minéralogique détectée : vérifier la source et réduire les minéraux dissous.")
+            elif t == "sensorielle":
+                conseils.append("👃 Pollution sensorielle détectée : analyser les composés organoleptiques.")
 
-                    output = io.BytesIO()
-                    pdf.output(output)
-                    return output.getvalue()
+        return list(types), conseils
 
-                pdf_bytes = to_pdf(df_uploaded)
+    if st.button("🧠 Détecter le type de pollution", key="btn_detect_pollution"):
+        types_detectés, conseils = detecter_type_pollution(valeurs_pollution)
+        
+        if "aucune" in types_detectés:
+            st.success("✅ Aucune pollution détectée selon les normes.")
+        else:
+            st.error(f"⚠️ Types de pollution détectés : {', '.join(types_detectés).capitalize()}")
+            for c in conseils:
+                st.info(c)
+# Fonction pour l'assistant IA
+def assistant_ia():
+    st.title("🤖 Assistant IA – Aide et support intelligent")
 
-                st.download_button(
-                    label="📄 Télécharger le rapport PDF",
-                    data=pdf_bytes,
-                    file_name="rapport_resultats_eau.pdf",
-                    mime="application/pdf"
-                )
+    # Historique de conversation
+    if "messages" not in st.session_state:
+        st.session_state.messages = [{"role": "assistant", "content": "Bonjour 👋, je suis l’assistant IA. Posez-moi vos questions sur l’application ou la qualité de l’eau."}]
 
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+
+    # Zone de saisie utilisateur
+    if prompt := st.chat_input("Posez votre question ici..."):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        # Appel à l’API OpenAI
+        try:
+            with st.chat_message("assistant"):
+                with st.spinner("Réflexion..."):
+                    completion = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=st.session_state.messages
+                    )
+                    response = completion.choices[0].message.content
+                    st.markdown(response)
+
+            st.session_state.messages.append({"role": "assistant", "content": response})
+
+        except Exception as e:
+            st.error(f"Erreur d’appel à l’API OpenAI : {e}")
 # Gestion de la navigation entre les pages
 if "page" not in st.session_state:
     st.session_state.page = "home"
