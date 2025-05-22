@@ -252,19 +252,6 @@ if st.session_state.page_active == "🏠 Accueil":
 # Prochaine étape : Base de données (si tu veux que je continue, dis-le et je l'intègre maintenant)
 
 # ==============================
-# ⚙️ Configuration de la page
-# ==============================
-st.set_page_config(page_title="Qualité de l'eau - Algérie", page_icon="💧", layout="wide")
-
-st.markdown("""
-    <style>
-    .main-title {text-align: center; font-size: 36px; color: #0a9396; font-weight: bold;}
-    .sub-title {text-align: center; font-size: 20px; color: #005f73;}
-    .bloc-section {border: 1px solid #ccc; padding: 20px; border-radius: 10px; background-color: #f5f5f5;}
-    </style>
-""", unsafe_allow_html=True)
-
-# ==============================
 # 📋 GESTION DES PRÉLÈVEMENTS
 # ==============================
 st.markdown("<h1 class='main-title'>📋 Base de Données des Prélèvements</h1>", unsafe_allow_html=True)
