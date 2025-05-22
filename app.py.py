@@ -415,7 +415,7 @@ else:
 # === Prédiction Deep Learning ===
 model_dnn_file = f"modele_dnn_{parametre_cible.replace(' ', '_')}.h5"
 if os.path.exists(model_dnn_file):
-    model_dnn = load_model("modele_dnn_{parametre_cible.replace(' ', '_')}.h5", compile=False)
+    model_dnn = load_model(model_dnn_file, compile=False)
     if st.button("🤖 Prédire avec Deep Learning"):
         try:
             pred_dnn = model_dnn.predict(X_input)[0][0]
