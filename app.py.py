@@ -170,10 +170,14 @@ st.markdown("---")
 
 # Bouton pour accéder à l'app
 if st.button("🚀 Accéder à l’application", use_container_width=True):
-    # À utiliser pour revenir à la page d'accueil
-    if st.button("🔙 Retour à l'accueil"):
-    st.session_state.page_active = "accueil"
-    st.experimental_rerun()  # Si tu veux forcer le rechargement
+    st.session_state.page_active = "application"
+    st.experimental_rerun()
+
+# Bouton retour visible si on est dans l'application
+if st.session_state.page_active != "accueil":
+    if st.button("🔙 Retour à l'accueil", use_container_width=True):
+        st.session_state.page_active = "accueil"
+        st.experimental_rerun()
 
 # Équipe projet
 st.markdown("""
