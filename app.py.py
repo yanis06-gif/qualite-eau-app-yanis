@@ -10,6 +10,14 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import altair as alt
 from tensorflow.keras.models import load_model
+from modules.accueil import page_accueil
+from modules.database import page_database
+from modules.prediction import page_prediction
+from modules.classification import page_classification
+from modules.pollution import page_pollution
+from modules.visualisation import page_visualisation
+from modules.assistant import page_assistant
+from modules.export import page_expor
 
 # Configuration globale
 st.set_page_config(
@@ -126,7 +134,7 @@ if "page" not in st.session_state:
 
 # Barre latérale de navigation
 with st.sidebar:
-    st.image("logo.png", width=150)
+    st.image("logo.png", width=300)
     st.title("🌐 Navigation")
     page = st.radio("Aller vers :", [
         "Accueil",
@@ -141,42 +149,6 @@ with st.sidebar:
     ])
     st.session_state.page = page
 
-# Affichage des pages
-if st.session_state.page == "Accueil":
-    import pages.accueil as accueil
-    accueil.show()
-
-elif st.session_state.page == "Base de données":
-    import pages.base_donnees as base
-    base.show()
-
-elif st.session_state.page == "Classification":
-    import pages.classification as clf
-    clf.show()
-
-elif st.session_state.page == "Prédiction Paramètre":
-    import pages.prediction_param as pred
-    pred.show()
-
-elif st.session_state.page == "Prédiction Fichier":
-    import pages.prediction_fichier as pf
-    pf.show()
-
-elif st.session_state.page == "Visualisation":
-    import pages.visualisation as vis
-    vis.show()
-
-elif st.session_state.page == "Export":
-    import pages.export as ex
-    ex.show()
-
-elif st.session_state.page == "Chatbot IA":
-    import pages.chatbot as bot
-    bot.show()
-
-elif st.session_state.page == "Éthique & À propos":
-    import pages.ethique as eth
-    eth.show()
 
 # Configuration de la page d'accueil
 st.set_page_config(page_title="Accueil - Qualité de l'eau", layout="centered", page_icon="💧")
@@ -185,7 +157,7 @@ st.set_page_config(page_title="Accueil - Qualité de l'eau", layout="centered", 
 col1, col2 = st.columns([1, 3])
 with col1:
     if os.path.exists("logo.png"):
-        st.image("logo.png", width=130)
+        st.image("logo.png", width=200)
 
 with col2:
     st.markdown("""
