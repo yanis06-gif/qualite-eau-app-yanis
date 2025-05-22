@@ -271,6 +271,9 @@ def show_main_page():
                     mime="application/pdf"
                 )
 
+        except Exception as e:
+            st.error(f"❌ Erreur de traitement : {e}")
+
 # Gestion de la navigation entre les pages
 if "page" not in st.session_state:
     st.session_state.page = "home"
