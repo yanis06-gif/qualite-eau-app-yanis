@@ -415,7 +415,7 @@ else:
 # === Prédiction Deep Learning ===
 model_dnn_file = f"modele_dnn_{parametre_cible.replace(' ', '_')}.h5"
 if os.path.exists(model_dnn_file):
-    model_dnn = load_model(model_dnn_file)
+    model_dnn = load_model("modele_dnn_{parametre_cible.replace(' ', '_')}.h5", compile=False)
     if st.button("🤖 Prédire avec Deep Learning"):
         try:
             pred_dnn = model_dnn.predict(X_input)[0][0]
@@ -448,7 +448,7 @@ if os.path.exists("modele_Classification.pk1"):
 
 # === Prédiction avec Deep Learning
 if os.path.exists("modele_dnn_classification.h5"):
-    model_class_dl = load_model("modele_dnn_classification.h5")
+    model_class_dl = load_model("modele_dnn_classification.h5",compile=False)
     if st.button("🤖 Classifier avec Deep Learning"):
         prediction_dl = model_class_dl.predict(X_input)
         classe_dl = np.argmax(prediction_dl, axis=1)[0]
