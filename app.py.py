@@ -348,6 +348,18 @@ else:
 # ================================
 # 🔍 PRÉDICTION D’UN PARAMÈTRE MANQUANT (VERSION COMPLÈTE)
 # ================================
+# ✅ Liste complète des 23 paramètres selon les normes algériennes
+parametres = [
+    "Total Coliform", "Escherichia Coli", "Faecal Streptococci",
+    "Turbidity", "pH", "Temperature", "Free Chlorine", "Chlorates",
+    "Sulfate", "Magnesium", "Calcium", "Conductivity", "Dry Residue",
+    "Complete Alkaline Title", "Nitrite", "Ammonium", "Phosphate",
+    "Nitrate", "Iron", "Manganese", "Colour", "Smell", "Taste"
+]
+
+# ✅ Sélection du paramètre à prédire (important à faire avant la saisie)
+parametre_cible = st.selectbox("🧪 Quel paramètre veux-tu prédire ?", parametres)
+
 st.header("🔍 Prédiction d’un paramètre manquant")
 
 # 🔧 Normes algériennes des 23 paramètres et conseils
