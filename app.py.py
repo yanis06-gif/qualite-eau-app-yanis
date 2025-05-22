@@ -143,9 +143,6 @@ with st.sidebar:
     st.session_state.page = page
 
 
-# Configuration de la page d'accueil
-st.set_page_config(page_title="Accueil - Qualité de l'eau", layout="centered", page_icon="💧")
-
 # Design en colonnes
 col1, col2 = st.columns([1, 3])
 with col1:
