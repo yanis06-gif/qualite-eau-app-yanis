@@ -125,23 +125,6 @@ thead th {
 if "page" not in st.session_state:
     st.session_state.page = "accueil"
 
-# Barre latérale de navigation
-with st.sidebar:
-    st.image("logo.png", width=300)
-    st.title("🌐 Navigation")
-    page = st.radio("Aller vers :", [
-        "Accueil",
-        "Base de données",
-        "Classification",
-        "Prédiction Paramètre",
-        "Prédiction Fichier",
-        "Visualisation",
-        "Export",
-        "Chatbot IA",
-        "Éthique & À propos"
-    ])
-    st.session_state.page = page
-
 
 # Design en colonnes
 col1, col2 = st.columns([1, 3])
@@ -168,16 +151,26 @@ with img2:
 
 st.markdown("---")
 
-# Bouton pour accéder à l'app
-if st.button("🚀 Accéder à l’application", use_container_width=True):
-    st.session_state.page_active = "application"
-    st.experimental_rerun()
+# Initialisation de la page active
+if "page_active" not in st.session_state:
+    st.session_state.page_active = "accueil"
 
-# Bouton retour visible si on est dans l'application
-if st.session_state.page_active != "accueil":
-    if st.button("🔙 Retour à l'accueil", use_container_width=True):
+# Page d'accueil
+if st.session_state.page_active == "accueil":
+    st.title("💧 Bienvenue sur l'application Qualité de l'eau")
+
+    if st.button("🚀 Accéder à l’application", use_container_width=True):
+        st.session_state.page_active = "application"
+
+# Page principale (après avoir cliqué sur "Accéder")
+if st.session_state.page_active == "application":
+    st.sidebar.markdown("### Navigation")
+    if st.sidebar.button("🔙 Retour à l'accueil"):
         st.session_state.page_active = "accueil"
-        st.experimental_rerun()
+
+    # ... ici tu mets les autres blocs de l'app, prédiction, classification, etc.
+    st.subheader("📋 Interface principale")
+
 
 # Équipe projet
 st.markdown("""
