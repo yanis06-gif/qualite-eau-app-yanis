@@ -384,8 +384,6 @@ def verifier_parametres_entres(valeurs: dict):
 
 st.subheader("🔍 Prédiction d’un paramètre manquant (IA)")
 
-# Choix du paramètre cible
-parametre_cible = st.selectbox("Choisir le paramètre à prédire :", parametres)
 
 # Saisie des autres paramètres
 valeurs_pred = {}
