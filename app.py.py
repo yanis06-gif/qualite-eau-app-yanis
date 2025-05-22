@@ -10,14 +10,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import altair as alt
 from tensorflow.keras.models import load_model
-from modules.accueil import page_accueil
-from modules.database import page_database
-from modules.prediction import page_prediction
-from modules.classification import page_classification
-from modules.pollution import page_pollution
-from modules.visualisation import page_visualisation
-from modules.assistant import page_assistant
-from modules.export import page_expor
+
 
 # Configuration globale
 st.set_page_config(
