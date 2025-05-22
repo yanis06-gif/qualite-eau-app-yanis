@@ -6,6 +6,7 @@ import os
 from datetime import datetime
 from fpdf import FPDF
 import io
+from tensorflow.keras.models import load_model
 
 # Configuration de la page
 st.set_page_config(
@@ -56,6 +57,15 @@ h1, h2, h3 {
     text-align: center;
     margin-bottom: 20px;
 }
+.image-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+.image-container img {
+    width: 300px;
+    margin: 0 10px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -69,8 +79,28 @@ def show_home_page():
     </div>
     """, unsafe_allow_html=True)
 
+    # Ajout d'images d'illustration
+    st.markdown("<div class='image-container'>", unsafe_allow_html=True)
+    st.markdown("<img src='https://example.com/image1.jpg' alt='Image 1'>", unsafe_allow_html=True)  # Remplacez par vos images
+    st.markdown("<img src='https://example.com/image2.jpg' alt='Image 2'>", unsafe_allow_html=True)  # Remplacez par vos images
+    st.markdown("</div>", unsafe_allow_html=True)
+
     if st.button("🚀 Accéder à l'application"):
         st.session_state.page = "main"
+
+# Fonction pour afficher le menu de navigation
+def show_navigation():
+    st.sidebar.title("🌐 Navigation")
+    page = st.sidebar.radio("Aller vers :", [
+        "Accueil",
+        "Gestion des Prélèvements",
+        "Classification",
+        "Prédiction d'un Paramètre",
+        "Détection de Pollution",
+        "Assistant IA",
+        "Exportation"
+    ])
+    st.session_state.page = page
 
 # Fonction pour afficher la page principale
 def show_main_page():
@@ -160,6 +190,17 @@ def show_main_page():
                     st.success("✅ Classification effectuée.")
                     st.dataframe(df_uploaded)
 
+                    # Conseils après classification
+                    st.markdown("### 📝 Conseils après Classification")
+                    for index, row in df_uploaded.iterrows():
+                        classe = row["Classe Prédite"]
+                        if classe == "Mauvaise":
+                            st.warning(f"⚠️ Prélèvement {index + 1}: La qualité de l'eau est **Mauvaise**. Recommandation: Vérifiez la source et effectuez des tests supplémentaires.")
+                        elif classe == "Moyenne":
+                            st.info(f"ℹ️ Prélèvement {index + 1}: La qualité de l'eau est **Moyenne**. Recommandation: Surveillez régulièrement la qualité.")
+                        elif classe == "Bonne":
+                            st.success(f"✅ Prélèvement {index + 1}: La qualité de l'eau est **Bonne**. Continuez à surveiller.")
+
                 elif action == "Prédiction d'un paramètre":
                     param_to_predict = st.selectbox("Quel paramètre voulez-vous prédire ?", parametres)
                     model_file = f"modele_{param_to_predict.replace(' ', '_')}.pk1"
@@ -245,9 +286,6 @@ def show_main_page():
                     mime="application/pdf"
                 )
 
-        except Exception as e:
-            st.error(f"❌ Erreur de traitement : {e}")
-
 # Gestion de la navigation entre les pages
 if "page" not in st.session_state:
     st.session_state.page = "home"
@@ -256,6 +294,9 @@ if st.session_state.page == "home":
     show_home_page()
 else:
     show_main_page()
+
+# Menu de navigation
+show_navigation()
 
 # Bouton de sortie
 if st.button("🚪 Quitter l'application"):
