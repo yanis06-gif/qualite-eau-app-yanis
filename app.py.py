@@ -249,7 +249,15 @@ if st.session_state.page_active == "🏠 Accueil":
     st.markdown("---")
     st.success("Utilise le menu à gauche pour commencer ✅")
 
-# Prochaine étape : Base de données (si tu veux que je continue, dis-le et je l'intègre maintenant)
+# ✅ Liste des 23 paramètres standards
+parametres = [
+    "Total Coliform", "Escherichia Coli", "Faecal Streptococci",
+    "Turbidity", "pH", "Temperature", "Free Chlorine", "Chlorates",
+    "Sulfate", "Magnesium", "Calcium", "Conductivity", "Dry Residue",
+    "Complete Alkaline Title", "Nitrite", "Ammonium", "Phosphate",
+    "Nitrate", "Iron", "Manganese", "Colour", "Smell", "Taste"
+]
+
 
 # ==============================
 # 📋 GESTION DES PRÉLÈVEMENTS
@@ -383,7 +391,6 @@ def verifier_parametres_entres(valeurs: dict):
     return alertes
 
 st.subheader("🔍 Prédiction d’un paramètre manquant (IA)")
-
 
 # Saisie des autres paramètres
 valeurs_pred = {}
