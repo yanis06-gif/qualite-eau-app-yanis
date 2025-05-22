@@ -170,7 +170,10 @@ st.markdown("---")
 
 # Bouton pour accéder à l'app
 if st.button("🚀 Accéder à l’application", use_container_width=True):
-    st.switch_page("app.py")
+    # À utiliser pour revenir à la page d'accueil
+st.session_state.page_active = "accueil"
+st.experimental_rerun()
+
 
 # Équipe projet
 st.markdown("""
