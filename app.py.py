@@ -121,6 +121,7 @@ def show_main_page():
                 st.session_state.df_prelèvements,
                 pd.DataFrame([new_data])
             ], ignore_index=True)
+            st.session_state.df_prelèvements.to_pickle("prelevements_sauvegarde.pkl")
             st.success("✅ Prélèvement enregistré avec succès.")
 
     # Affichage du tableau des prélèvements
