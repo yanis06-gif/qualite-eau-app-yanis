@@ -190,17 +190,6 @@ st.markdown("""
 ---
 <p style='text-align:center;'>Développée avec ❤️ par l'équipe IA & Eau Potable – Algérie 🇩🇿</p>
 """, unsafe_allow_html=True)
-# ======================================
-# 💧 QUALITÉ DE L'EAU POTABLE - APP.PY
-# Partie 2 : Application principale avec menu
-# ======================================
-
-# ============ PAGE CONFIGURATION ============
-st.set_page_config(
-    page_title="Qualité de l'eau potable",
-    page_icon="💧",
-    layout="wide"
-)
 
 # ============ CHARGEMENT DES DONNÉES ============
 if "page_active" not in st.session_state:
