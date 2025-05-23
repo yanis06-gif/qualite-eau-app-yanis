@@ -577,46 +577,50 @@ if st.button("🧠 Détecter le type de pollution", key="btn_detect_pollution"):
         st.error(f"⚠️ Types de pollution détectés : {', '.join(types_detectés).capitalize()}")
         for c in conseils:
             st.info(c)
-if st.session_state.page_active == "assistant":
-    st.title("🤖 Assistant IA – Aide et support intelligent")
+import openai
+from dotenv import load_dotenv
+import os
 
-    load_dotenv()
-    openai.api_key = os.getenv("OPENAI_API_KEY")
+# 🔐 Charger la clé API
+load_dotenv()
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    if not openai.api_key:
-        st.error("⚠️ Clé API OpenAI manquante. Vérifie ton fichier `.env`")
-    else:
-        # Historique de conversation
-        if "messages" not in st.session_state:
-            st.session_state.messages = [{"role": "assistant", "content": "Bonjour 👋, je suis l’assistant IA. Posez-moi vos questions sur l’application ou la qualité de l’eau."}]
+# Créer une page ou un bloc pour l'assistant IA
+st.title("🤖 Assistant IA – Aide intelligente")
 
-        for msg in st.session_state.messages:
-            with st.chat_message(msg["role"]):
-                st.markdown(msg["content"])
+# Initialiser l’historique des messages
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {"role": "assistant", "content": "Bonjour 👋, je suis votre assistant IA. Posez-moi toutes vos questions sur la qualité de l'eau ou l'application."}
+    ]
 
-        # Zone de saisie utilisateur
-        if prompt := st.chat_input("Posez votre question ici..."):
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
+# Afficher la conversation
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
-            try:
-                with st.chat_message("assistant"):
-                    with st.spinner("Réflexion..."):
-                        response = openai.ChatCompletion.create(
-                            model="gpt-3.5-turbo",
-                            messages=st.session_state.messages
-                        ).choices[0].message.content
-                        st.markdown(response)
+# Saisie de l’utilisateur
+if prompt := st.chat_input("💬 Posez votre question ici..."):
+    # Ajouter le message utilisateur
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
-                st.session_state.messages.append({"role": "assistant", "content": response})
-            except Exception as e:
-                st.error(f"Erreur d’appel OpenAI : {e}")
+    # Appel à OpenAI
+    try:
+        with st.chat_message("assistant"):
+            with st.spinner("💡 Réflexion..."):
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=st.session_state.messages
+                )
+                assistant_reply = response["choices"][0]["message"]["content"]
+                st.markdown(assistant_reply)
 
-import base64
-from fpdf import FPDF
+        st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
 
-st.header("📂 Importer / Exporter un fichier Excel ou CSV")
+    except Exception as e:
+        st.error(f"❌ Erreur d’appel à OpenAI : {e}")
 
 # === Import du fichier utilisateur
 uploaded_file = st.file_uploader("📤 Charger un fichier contenant les paramètres d’analyse", type=["xlsx", "csv"])
