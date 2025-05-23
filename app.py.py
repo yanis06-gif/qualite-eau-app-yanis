@@ -472,25 +472,6 @@ if os.path.exists("modele_Classification.pk1"):
         for a in verifier_parametres_entres(valeurs_class):
             st.warning(a)
 
-# === Prédiction avec Deep Learning
-if os.path.exists("modele_dnn_classification.h5"):
-    model_class_dl = load_model("modele_dnn_classification.h5",compile=False)
-    # Définir le dictionnaire des classes
-    classes = {
-        0: "Bonne",
-        1: "Mauvaise",
-        2: "Moyenne",
-        3: "Très bonne",
-        4: "Très mauvaise"
-    }
-    if st.button("🤖 Classifier avec Deep Learning"):
-        prediction_dl = model_class_dl.predict(X_input)
-        classe_dl = np.argmax(prediction_dl, axis=1)[0]
-        label_dl = classes.get(classe_dl, "Inconnue")
-        st.success(f"🤖 Classe prédite avec Deep Learning : **{label_dl}**")
-        st.markdown("### 🧾 Interprétation et conseils :")
-        for a in verifier_parametres_entres(valeurs_class):
-            st.warning(a)
 
 # Explication des classes
 with st.expander("ℹ️ Voir la signification des classes de qualité d’eau"):
@@ -592,42 +573,42 @@ if st.button("🧠 Détecter le type de pollution", key="btn_detect_pollution"):
         st.error(f"⚠️ Types de pollution détectés : {', '.join(types_detectés).capitalize()}")
         for c in conseils:
             st.info(c)
-# === 🤖 PAGE ASSISTANT IA ===
 if st.session_state.page_active == "assistant":
     st.title("🤖 Assistant IA – Aide et support intelligent")
 
     load_dotenv()
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    # Historique de conversation
-    if "messages" not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": "Bonjour 👋, je suis l’assistant IA. Posez-moi vos questions sur l’application ou la qualité de l’eau."}]
+    if not openai.api_key:
+        st.error("⚠️ Clé API OpenAI manquante. Vérifie ton fichier `.env`")
+    else:
+        # Historique de conversation
+        if "messages" not in st.session_state:
+            st.session_state.messages = [{"role": "assistant", "content": "Bonjour 👋, je suis l’assistant IA. Posez-moi vos questions sur l’application ou la qualité de l’eau."}]
 
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+        for msg in st.session_state.messages:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
 
-    # Zone de saisie utilisateur
-    if prompt := st.chat_input("Posez votre question ici..."):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+        # Zone de saisie utilisateur
+        if prompt := st.chat_input("Posez votre question ici..."):
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
 
-        # Appel à l’API OpenAI
-        try:
-            with st.chat_message("assistant"):
-                with st.spinner("Réflexion..."):
-                    completion = openai.ChatCompletion.create(
-                        model="gpt-3.5-turbo",
-                        messages=st.session_state.messages
-                    )
-                    response = completion.choices[0].message.content
-                    st.markdown(response)
+            try:
+                with st.chat_message("assistant"):
+                    with st.spinner("Réflexion..."):
+                        response = openai.ChatCompletion.create(
+                            model="gpt-3.5-turbo",
+                            messages=st.session_state.messages
+                        ).choices[0].message.content
+                        st.markdown(response)
 
-            st.session_state.messages.append({"role": "assistant", "content": response})
+                st.session_state.messages.append({"role": "assistant", "content": response})
+            except Exception as e:
+                st.error(f"Erreur d’appel OpenAI : {e}")
 
-        except Exception as e:
-            st.error(f"Erreur d’appel à l’API OpenAI : {e}")
 import base64
 from fpdf import FPDF
 
