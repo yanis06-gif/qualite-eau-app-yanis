@@ -578,49 +578,48 @@ if st.button("🧠 Détecter le type de pollution", key="btn_detect_pollution"):
         for c in conseils:
             st.info(c)
 import openai
+from openai import OpenAI
 from dotenv import load_dotenv
 import os
 
-# 🔐 Charger la clé API
+# Charger la clé API
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Créer une page ou un bloc pour l'assistant IA
+# Interface utilisateur
 st.title("🤖 Assistant IA – Aide intelligente")
 
-# Initialiser l’historique des messages
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "assistant", "content": "Bonjour 👋, je suis votre assistant IA. Posez-moi toutes vos questions sur la qualité de l'eau ou l'application."}
+        {"role": "assistant", "content": "Bonjour 👋, je suis votre assistant IA. Posez-moi toutes vos questions."}
     ]
 
-# Afficher la conversation
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# Saisie de l’utilisateur
 if prompt := st.chat_input("💬 Posez votre question ici..."):
-    # Ajouter le message utilisateur
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Appel à OpenAI
     try:
         with st.chat_message("assistant"):
-            with st.spinner("💡 Réflexion..."):
-                response = openai.ChatCompletion.create(
+            with st.spinner("💡 L’assistant réfléchit..."):
+                completion = client.chat.completions.create(
                     model="gpt-3.5-turbo",
-                    messages=st.session_state.messages
+                    messages=[
+                        {"role": m["role"], "content": m["content"]}
+                        for m in st.session_state.messages
+                    ]
                 )
-                assistant_reply = response["choices"][0]["message"]["content"]
-                st.markdown(assistant_reply)
-
-        st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
+                reply = completion.choices[0].message.content
+                st.markdown(reply)
+                st.session_state.messages.append({"role": "assistant", "content": reply})
 
     except Exception as e:
-        st.error(f"❌ Erreur d’appel à OpenAI : {e}")
+        st.error(f"❌ Erreur lors de l’appel à OpenAI : {e}")
+
 
 # === Import du fichier utilisateur
 uploaded_file = st.file_uploader("📤 Charger un fichier contenant les paramètres d’analyse", type=["xlsx", "csv"])
