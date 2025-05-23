@@ -577,14 +577,19 @@ if st.button("🧠 Détecter le type de pollution", key="btn_detect_pollution"):
         st.error(f"⚠️ Types de pollution détectés : {', '.join(types_detectés).capitalize()}")
         for c in conseils:
             st.info(c)
-import openai
+import os
 from openai import OpenAI
 from dotenv import load_dotenv
-import os
 
-# Charger la clé API
-load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+load_dotenv()  # Charge les variables du .env
+
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    st.error("❌ Clé API OpenAI non trouvée. Vérifiez votre fichier `.env`.")
+else:
+    client = OpenAI(api_key=api_key)
+    # ... suite du code assistant
+
 
 # Interface utilisateur
 st.title("🤖 Assistant IA – Aide intelligente")
