@@ -577,18 +577,21 @@ if st.button("🧠 Détecter le type de pollution", key="btn_detect_pollution"):
         st.error(f"⚠️ Types de pollution détectés : {', '.join(types_detectés).capitalize()}")
         for c in conseils:
             st.info(c)
-import os
 from openai import OpenAI
 from dotenv import load_dotenv
+import os
 
-load_dotenv()  # Charge les variables du .env
+# Charge le fichier .env
+load_dotenv(dotenv_path=".devcontainer/.env")  # ou juste load_dotenv() si ton .env est à la racine
 
+# Récupère la clé
 api_key = os.getenv("OPENAI_API_KEY")
+
 if not api_key:
-    st.error("❌ Clé API OpenAI non trouvée. Vérifiez votre fichier `.env`.")
+    st.error("❌ Clé API OpenAI non trouvée. Vérifiez votre fichier `.env` et son emplacement.")
 else:
     client = OpenAI(api_key=api_key)
-    # ... suite du code assistant
+    # ici tu peux continuer avec le chat
 
 
 # Interface utilisateur
