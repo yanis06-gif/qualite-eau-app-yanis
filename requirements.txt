@@ -8,3 +8,5 @@ matplotlib
 altair
 fpdf
 openpyxl
+openai
+python-dotenv
