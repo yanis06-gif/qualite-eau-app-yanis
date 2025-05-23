@@ -457,13 +457,21 @@ X_input = np.array([valeurs_class[p] for p in parametres]).reshape(1, -1)
 if os.path.exists("modele_Classification.pk1"):
     model_class_rf = joblib.load("modele_Classification.pk1")
     # Définir le dictionnaire des classes
-    classes = {
-        0: "Bonne",
-        1: "Mauvaise",
-        2: "Moyenne",
-        3: "Très bonne",
-        4: "Très mauvaise"
-    }
+    # Cette ligne manquait probablement
+classes = {
+    0: "Bonne",
+    1: "Mauvaise",
+    2: "Moyenne",
+    3: "Très bonne",
+    4: "Très mauvaise"
+}
+
+# Ton affichage
+with st.expander("📘 Voir les correspondances des classes encodées"):
+    for code, label in classes.items():
+        st.markdown(f"**{code}** → {label}")
+
+
     if st.button("📊 Classifier avec Random Forest"):
         prediction_rf = model_class_rf.predict(X_input)[0]
         classe_rf = classes.get(prediction_rf, "Inconnue")
