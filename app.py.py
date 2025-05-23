@@ -454,8 +454,8 @@ for param in parametres:
 X_input = np.array([valeurs_class[p] for p in parametres]).reshape(1, -1)
 
 # === Prédiction avec Random Forest
-if os.path.exists("modele_Classification.pk1"):
-    model_class_rf = joblib.load("modele_Classification.pk1")
+if os.path.exists("modele_Classification.pkl"):
+    model_class_rf = joblib.load("modele_Classification.pkl")
     # Définir le dictionnaire des classes
     # Cette ligne manquait probablement
 
