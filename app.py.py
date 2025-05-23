@@ -458,6 +458,7 @@ if os.path.exists("modele_Classification.pk1"):
     model_class_rf = joblib.load("modele_Classification.pk1")
     # Définir le dictionnaire des classes
     # Cette ligne manquait probablement
+
 classes = {
     0: "Bonne",
     1: "Mauvaise",
@@ -466,19 +467,14 @@ classes = {
     4: "Très mauvaise"
 }
 
-# Ton affichage
-with st.expander("📘 Voir les correspondances des classes encodées"):
-    for code, label in classes.items():
-        st.markdown(f"**{code}** → {label}")
-
-
-    if st.button("📊 Classifier avec Random Forest"):
-        prediction_rf = model_class_rf.predict(X_input)[0]
-        classe_rf = classes.get(prediction_rf, "Inconnue")
-        st.success(f"📈 Classe prédite avec Random Forest : **{classe_rf}**")
-        st.markdown("### 🧾 Interprétation et conseils :")
-        for a in verifier_parametres_entres(valeurs_class):
-            st.warning(a)
+# Chargement du modèle
+try:
+    model_class_rf = joblib.load("modele_Classification.pk1")
+    prediction_rf = model_class_rf.predict(X_input)[0]
+    label_rf = classes.get(prediction_rf, "Inconnue")
+    st.success(f"🌲 Classification Random Forest : **{label_rf}**")
+except Exception as e:
+    st.error(f"❌ Erreur lors de la prédiction avec Random Forest : {e}")
 
 
 # Explication des classes
